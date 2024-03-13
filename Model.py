@@ -36,6 +36,14 @@ TNeptunus = 164.8*Seconden_in_een_jaar
 TTitan = 15.94513889*Seconden_in_een_dag
 TMaan = 27.32*Seconden_in_een_dag
 
+# Starthoek baan in graden zoals op de eenheidscirkel
+PhiAarde = 0
+PhiMars = 0
+PhiJupiter = 0
+PhiSaturnus = 0
+PhiNeptunus = 0
+PhiTitan = 0 #bij de manen (Titan en Maan) gaat het om de starthoek van de maan om de planeet
+PhiMaan = 0
 # De functie voor de zwaartekracht van de planeet
 def Newton(MPlaneet, R):
     Fg = (G*MTitanfall*MPlaneet)/R**2
