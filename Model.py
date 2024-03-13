@@ -44,6 +44,7 @@ PhiSaturnus = 0
 PhiNeptunus = 0
 PhiTitan = 0 #bij de manen (Titan en Maan) gaat het om de starthoek van de maan om de planeet
 PhiMaan = 0
+
 # De functie voor de zwaartekracht van de planeet
 def Newton(MPlaneet, R):
     Fg = (G*MTitanfall*MPlaneet)/R**2
