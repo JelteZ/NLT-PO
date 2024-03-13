@@ -1,6 +1,8 @@
+import numpy as np
 
+Pi = np.pi
 G = 6.67384*10**-11 # Gravitatieconstante
-
+t = 0
 MTitanfall = 750    # Massa van onze Titanfall in kg
 
 # Massa's hemellichamen in kg
@@ -38,6 +40,13 @@ TMaan = 27.32*Seconden_in_een_dag
 def Newton(MPlaneet, R):
     Fg = (G*MTitanfall*MPlaneet)/R**2
     return Fg
+def Hoeksnelheid(R, T):
+    global V
+    V = (2*Pi*R)/T
+    return V
 
-
-
+def cirkelbeweging(R,T,Phi):
+    Hoeksnelheid(R,T)
+    x = R*np.cos(V*t + Phi)
+    y = R*np.sin(V*t + Phi)
+    return [x,y]
