@@ -50,12 +50,12 @@ def Newton(MPlaneet, R):
     Fg = (G*MTitanfall*MPlaneet)/R**2
     return Fg
 def Hoeksnelheid(R, T):
-    global V
     V = (2*Pi*R)/T
     return V
 
 def cirkelbeweging(R,T,Phi):
-    Hoeksnelheid(R,T)
+
+    V = Hoeksnelheid(R,T)
     x = R*np.cos(V*t + Phi)
     y = R*np.sin(V*t + Phi)
     return [x,y]
