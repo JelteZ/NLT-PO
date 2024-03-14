@@ -47,9 +47,11 @@ PhiMaan = 0
 
 # De functie voor de zwaartekracht van de planeet
 def Newton(MPlaneet, R):
+
     Fg = (G*MTitanfall*MPlaneet)/R**2
     return Fg
 def Hoeksnelheid(R, T):
+
     V = (2*Pi*R)/T
     return V
 
@@ -59,3 +61,6 @@ def cirkelbeweging(R,T,Phi):
     x = R*np.cos(V*t + Phi)
     y = R*np.sin(V*t + Phi)
     return [x,y]
+
+def Kracht_op_Titanfall():
+    return
