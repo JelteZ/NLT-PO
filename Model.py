@@ -5,6 +5,8 @@ G = 6.67384*10**-11 # Gravitatieconstante
 t = 0
 MTitanfall = 750    # Massa van onze Titanfall in kg
 
+x_titanfall = 0
+y_titanfall = 0
 # Massa's hemellichamen in kg
 MZon = 1.9884*10**30
 MAarde = 5.972*10**24
@@ -80,3 +82,4 @@ Distance = np.sqrt((x_Titan - x_titanfall)**2 + (y_Titan - y_titanfall)**2)
 while Distance > 0:
     bewegingTitanfall()
     Distance = np.sqrt((x_Titan - x_titanfall)**2 + (y_Titan - y_titanfall)**2)
+    t += 1
