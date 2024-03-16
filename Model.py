@@ -45,11 +45,17 @@ PhiNeptunus = 0
 PhiTitan = 0 #bij de manen (Titan en Maan) gaat het om de starthoek van de maan om de planeet
 PhiMaan = 0
 
-# De functie voor de zwaartekracht van de planeet
-def Newton(MPlaneet, R):
+def Hoekalfa(x_planeet, y_planeet, x_titanfall, y_titanfall):
+    alfa = np.arctan((y_planeet-y_titanfall)/(x_planeet-x_titanfall))
+    return alfa
 
-    Fg = (G*MTitanfall*MPlaneet)/R**2
-    return Fg
+# De functie voor de zwaartekracht van de planeet
+def Newton(MPlaneet, R, alfa):
+
+    Fg_x = np.cos(alfa)*(G*MTitanfall*MPlaneet)/R**2 #hierin is alfa de hoek tussen de lijn Titanfall - planeet en de x-as
+    Fg_y = np.sin(alfa)*(G*MTitanfall*MPlaneet)/R**2
+
+    return Fg_x, Fg_y
 def Hoeksnelheid(R, T):
 
     V = (2*Pi*R)/T
@@ -61,7 +67,16 @@ def cirkelbeweging(R,T,Phi):
     x = R*np.cos(V*t + Phi)
     y = R*np.sin(V*t + Phi)
     return [x,y]
+def bewegingTitanfall(Fg_x, Fg_y, a_x, a_y, v_x, v_y,x_titanfall, y_titanfall):
+    a_x = a_x + Fg_x/MTitanfall 
+    a_y = a_y + Fg_y/MTitanfall
+    v_x = v_x + a_x*t
+    v_y = v_y + a_y*t
+    x_titanfall = x_titanfall+ v_x*t
+    y_titanfall = y_titanfall + v_y*t
 
-def Kracht_op_Titanfall():
-    return
-ewrewrewr
+Distance = np.sqrt((x_Titan - x_titanfall)**2 + (y_Titan - y_titanfall)**2)
+
+while Distance > 0:
+    bewegingTitanfall()
+    Distance = np.sqrt((x_Titan - x_titanfall)**2 + (y_Titan - y_titanfall)**2)
