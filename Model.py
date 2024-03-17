@@ -39,13 +39,13 @@ TTitan = 15.94513889*Seconden_in_een_dag
 TMaan = 27.32*Seconden_in_een_dag
 
 # Starthoek baan in graden zoals op de eenheidscirkel
-PhiAarde = 0
-PhiMars = 0
-PhiJupiter = 0
-PhiSaturnus = 0
-PhiNeptunus = 0
+PhiAarde = 25
+PhiMars = 329
+PhiJupiter = 185
+PhiSaturnus = 257
+PhiNeptunus = 341
 PhiTitan = 0 #bij de manen (Titan en Maan) gaat het om de starthoek van de maan om de planeet
-PhiMaan = 0
+PhiMaan = 25
 
 def Hoekalfa(x_planeet, y_planeet, x_titanfall, y_titanfall):
     alfa = np.arctan((y_planeet-y_titanfall)/(x_planeet-x_titanfall))
