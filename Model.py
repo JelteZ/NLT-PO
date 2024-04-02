@@ -1,4 +1,6 @@
 import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
 
 Pi = np.pi
 G = 6.67384*10**-11 # Gravitatieconstante
@@ -94,7 +96,7 @@ def cirkelbeweging(R, T, Phi, t):
         y = R * np.sin(V * t + Phi)
         return x, y
     else:
-        return None, None
+        return 0, 0 # Valbeveiliging voor de Zon
 
 def Planetenposities(t):
     planeten_locaties = {}
@@ -114,12 +116,24 @@ def bewegingTitanfall(Fg_x, Fg_y, a_x, a_y, v_x, v_y,x_titanfall, y_titanfall):
     x_titanfall = x_titanfall+ v_x*t
     y_titanfall = y_titanfall + v_y*t
 
-#Distance = np.sqrt((x_Titan - x_titanfall)**2 + (y_Titan - y_titanfall)**2)
+fig, ax = plt.subplots()
+ax.set_xlim(-2e12, 2e12)
+ax.set_ylim(-2e12, 2e12)
+scat = ax.scatter([], [], s=50)
+all_positions = []
+def init():
+    scat.set_offsets(np.zeros((0, 2)))
+    return scat,
 
-#while Distance > 0:
-    bewegingTitanfall()
-    Distance = np.sqrt((x_Titan - x_titanfall)**2 + (y_Titan - y_titanfall)**2)
-    t += 1
-while t < 1000:
-    print(Planetenposities(t))
-    t += 1
+
+def update(frame):
+    t = frame
+    planeten_posities = Planetenposities(t)
+    positions = np.array([[planet["x"], planet["y"]] for planet in planeten_posities.values()])
+    all_positions.append(positions)
+    all_positions_to_plot = np.concatenate(all_positions, axis=0)
+    scat.set_offsets(all_positions_to_plot)
+    return scat,
+
+ani = FuncAnimation(fig, update, frames=np.arange(0, Seconden_in_een_jaar), init_func=init, blit=True)
+plt.show()
