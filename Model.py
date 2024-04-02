@@ -14,9 +14,9 @@ Seconden_in_een_jaar = Seconden_in_een_dag*365
 Hemellichamen = {
     "Zon": {
         "Massa": 1.9884 * 10**30,  # kg
-        "Baanstraal": None,  # Nvt voor de zon
-        "Omlooptijd": None,  # Nvt voor de zon
-        "Starthoek": None,  # Nvt voor de zon
+        "Baanstraal": 0,  # Nvt voor de zon
+        "Omlooptijd": 0,  # Nvt voor de zon
+        "Starthoek": 0,  # Nvt voor de zon
     },
     "Aarde": {
         "Massa": 5.972 * 10**24,  # kg
@@ -80,16 +80,22 @@ def Newton(MPlaneet, R, alfa):
 
     return Fg_x, Fg_y
 def Hoeksnelheid(R, T):
+    if T == 0: #delen door 0 beveiliging
+        return None
+    else:
+        V = (2 * Pi * R) / T
+        return V
 
-    V = (2*Pi*R)/T
-    return V
 
-def cirkelbeweging(R,T,Phi):
+def cirkelbeweging(R, T, Phi, t):
+    V = Hoeksnelheid(R, T)
+    if R is not None and V is not None:
+        x = R * np.cos(V * t + Phi)
+        y = R * np.sin(V * t + Phi)
+        return x, y
+    else:
+        return None, None
 
-    V = Hoeksnelheid(R,T)
-    x = R*np.cos(V*t + Phi)
-    y = R*np.sin(V*t + Phi)
-    return x,y
 def Planetenposities(t):
     planeten_locaties = {}
     for planeet, gegevens in Hemellichamen.items():
@@ -98,7 +104,8 @@ def Planetenposities(t):
         omlooptijd = gegevens["Omlooptijd"]
         starthoek = gegevens["Starthoek"]
         x, y = cirkelbeweging(baanstraal, omlooptijd, starthoek, t)
-        planeten_locaties = {"x": x, "y": y}
+        planeten_locaties[planeet] = {"x": x, "y": y}
+    return planeten_locaties
 def bewegingTitanfall(Fg_x, Fg_y, a_x, a_y, v_x, v_y,x_titanfall, y_titanfall):
     a_x = a_x + Fg_x/MTitanfall 
     a_y = a_y + Fg_y/MTitanfall
@@ -107,9 +114,12 @@ def bewegingTitanfall(Fg_x, Fg_y, a_x, a_y, v_x, v_y,x_titanfall, y_titanfall):
     x_titanfall = x_titanfall+ v_x*t
     y_titanfall = y_titanfall + v_y*t
 
-Distance = np.sqrt((x_Titan - x_titanfall)**2 + (y_Titan - y_titanfall)**2)
+#Distance = np.sqrt((x_Titan - x_titanfall)**2 + (y_Titan - y_titanfall)**2)
 
-while Distance > 0:
+#while Distance > 0:
     bewegingTitanfall()
     Distance = np.sqrt((x_Titan - x_titanfall)**2 + (y_Titan - y_titanfall)**2)
+    t += 1
+while t < 1000:
+    print(Planetenposities(t))
     t += 1
