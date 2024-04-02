@@ -166,6 +166,6 @@ scatters = [ax.scatter([], [], s=50, color=color) for color in colors]
 all_positions = []
 
 # Call FuncAnimation with the updated update() function
-ani = FuncAnimation(fig, update, frames=np.arange(0, 365*24*3600), init_func=init, blit=True)
+ani = FuncAnimation(fig, update, frames=np.arange(0, Seconden_in_een_jaar), init_func=init, blit=True)
 plt.legend(loc='upper left')
 plt.show()
