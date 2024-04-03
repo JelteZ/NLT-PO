@@ -178,6 +178,9 @@ def update(frame):
         all_positions[i].append(positions)
         all_positions_to_plot = np.concatenate(all_positions[i], axis=0)
         scatters[i].set_offsets(all_positions_to_plot)
+    print(f"all_positions_to_plot {all_positions_to_plot}")  
+    print(f"all_positions {all_positions}")
+    print(f"scatters {scatters}")  
     return scatters
 
 
