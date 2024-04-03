@@ -138,8 +138,8 @@ def bewegingTitanfall(Fg_x, Fg_y, a_x, a_y, v_x, v_y,x_titanfall, y_titanfall):
     y_titanfall = y_titanfall + v_y*t
 
 fig, ax = plt.subplots(figsize = (16,16))
-ax.set_xlim(-2e11, 2e11)
-ax.set_ylim(-2e11, 2e11)
+ax.set_xlim(-4e12, 4e12)
+ax.set_ylim(-4e12, 4e12)
 scat = ax.scatter([], [], s=10)
 all_positions = []
 
@@ -150,6 +150,7 @@ def init():
     return scat,
 
 def update(frame):
+    global t
     t = frame
     planeten_posities = Planetenposities(t)
     for i, (planet, color) in enumerate(zip(Hemellichamen.keys(), colors)):
@@ -158,6 +159,7 @@ def update(frame):
         all_positions_to_plot = np.concatenate(all_positions[i], axis=0)
         scatters[i].set_offsets(all_positions_to_plot)
     return scatters
+
 
 # Create scatter plots for each planet
 scatters = [ax.scatter([], [], s=50, color=color) for color in colors]
