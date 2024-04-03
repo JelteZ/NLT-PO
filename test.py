@@ -155,37 +155,42 @@ def bewegingTitanfall(Fg_x, Fg_y, a_x, a_y, v_x, v_y,x_titanfall, y_titanfall):
     x_titanfall = x_titanfall+ v_x*t
     y_titanfall = y_titanfall + v_y*t
 
-fig, ax = plt.subplots(figsize = (16,16))
-ax.set_xlim(-4e12, 4e12)
-ax.set_ylim(-4e12, 4e12)
-scat = ax.scatter([], [], s=10)
-all_positions = []
+# fig, ax = plt.subplots(figsize = (16,16))
+# ax.set_xlim(-4e12, 4e12)
+# ax.set_ylim(-4e12, 4e12)
+# scat = ax.scatter([], [], s=10)
+# all_positions = []
 
-def init():
-    for i, (planet, color) in enumerate(zip(Hemellichamen.keys(), colors)):
-        ax.scatter([], [], s=10, color=color, label=planet)
-        all_positions.append([])  # Initialize all_positions list for each planet
-    return scat,
+# def init():
+#     for i, (planet, color) in enumerate(zip(Hemellichamen.keys(), colors)):
+#         ax.scatter([], [], s=10, color=color, label=planet)
+#         all_positions.append([])  # Initialize all_positions list for each planet
+#     return scat,
 
-def update(frame):
-    global t
-    t = frame
-    planeten_posities = Planetenposities(t)
-    for i, (planet, color) in enumerate(zip(Hemellichamen.keys(), colors)):
-        positions = np.array([[planeten_posities[planet]["x"], planeten_posities[planet]["y"]]])
-        all_positions[i].append(positions)
-        all_positions_to_plot = np.concatenate(all_positions[i], axis=0)
-        scatters[i].set_offsets(all_positions_to_plot)
-    return scatters
+# def update(frame):
+#     global t
+#     t = frame
+#     planeten_posities = Planetenposities(t)
+#     for i, (planet, color) in enumerate(zip(Hemellichamen.keys(), colors)):
+#         positions = np.array([[planeten_posities[planet]["x"], planeten_posities[planet]["y"]]])
+#         all_positions[i].append(positions)
+#         all_positions_to_plot = np.concatenate(all_positions[i], axis=0)
+#         scatters[i].set_offsets(all_positions_to_plot)
+#     return scatters
 
 
-# Create scatter plots for each planet
-scatters = [ax.scatter([], [], s=50, color=color) for color in colors]
+# # Create scatter plots for each planet
+# scatters = [ax.scatter([], [], s=50, color=color) for color in colors]
 
-# Initialize all_positions list to store positions for each planet
-all_positions = []
+# # Initialize all_positions list to store positions for each planet
+# all_positions = []
 
-# Call FuncAnimation with the updated update() function
-ani = FuncAnimation(fig, update, frames=np.arange(0, Seconden_in_een_jaar), init_func=init, blit=True)
-plt.legend(loc='upper left')
-plt.show()
+# # Call FuncAnimation with the updated update() function
+# ani = FuncAnimation(fig, update, frames=np.arange(0, Seconden_in_een_jaar), init_func=init, blit=True)
+# plt.legend(loc='upper left')
+# plt.show()
+print("tets")
+while t<1000:
+    p = Planetenposities(t)
+    t =+1
+print('poep')
