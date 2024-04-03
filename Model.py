@@ -12,6 +12,7 @@ x_titanfall = 0
 y_titanfall = 0
 Seconden_in_een_dag = 24*3600
 Seconden_in_een_jaar = Seconden_in_een_dag*365
+radiaal_per_graad = 2*Pi/360
 
 # Bibliotheek met al onze startwaarden/constanten
 Hemellichamen = {
@@ -27,7 +28,7 @@ Hemellichamen = {
         "Massa": 5.972 * 10**24,  # kg
         "Baanstraal": 1.496 * 10**11,  # m
         "Omlooptijd": 365.256 * Seconden_in_een_dag,  # s
-        "Starthoek": 25,  # degrees
+        "Starthoek": 25 * radiaal_per_graad,  # degrees
         "x": 0,
         "y": 0,
     },
@@ -35,15 +36,15 @@ Hemellichamen = {
         "Massa": 6.4171 * 10**23,  # kg
         "Baanstraal": 2.279 * 10**11,  # m
         "Omlooptijd": 687 * Seconden_in_een_dag,  # s
-        "Starthoek": 329,  # degrees
+        "Starthoek": 329 * radiaal_per_graad,  # degrees
         "x": 0,
-        "y": 0,     
+        "y": 0,
     },
     "Jupiter": {
         "Massa": 1.8982 * 10**27,  # kg
         "Baanstraal": 7.785 * 10**11,  # m
         "Omlooptijd": 11.86 * Seconden_in_een_jaar,  # s
-        "Starthoek": 185,  # degrees
+        "Starthoek": 185 * radiaal_per_graad,  # degrees
         "x": 0,
         "y": 0,
     },
@@ -51,7 +52,7 @@ Hemellichamen = {
         "Massa": 5.6834 * 10**26,  # kg
         "Baanstraal": 1.427 * 10**12,  # m
         "Omlooptijd": 29.45 * Seconden_in_een_jaar,  # s
-        "Starthoek": 257,  # degrees
+        "Starthoek": 257 * radiaal_per_graad,  # degrees
         "x": 0,
         "y": 0,
     },
@@ -59,7 +60,7 @@ Hemellichamen = {
         "Massa": 86.8 * 10**24,  # kg
         "Baanstraal": 2.871 * 10**12,  # m
         "Omlooptijd": 84.01 * Seconden_in_een_jaar,  # s
-        "Starthoek": 244,  # degrees
+        "Starthoek": 244 * radiaal_per_graad,  # degrees
         "x": 0,
         "y": 0,
     },
@@ -67,7 +68,7 @@ Hemellichamen = {
         "Massa": 1.0243 * 10**26,  # kg
         "Baanstraal": 4.498 * 10**12,  # m
         "Omlooptijd": 164.8 * Seconden_in_een_jaar,  # s
-        "Starthoek": 341,  # degrees
+        "Starthoek": 341 * radiaal_per_graad,  # degrees
         "x": 0,
         "y": 0,
     },
@@ -83,7 +84,7 @@ Hemellichamen = {
         "Massa": 0.0735 * 10**24,  # kg
         "Baanstraal": 384.4 * 10**6,  # m (om Aarde)
         "Omlooptijd": 27.32 * Seconden_in_een_dag,  # s (om Aarde)
-        "Starthoek": 25,  # degrees (om Aarde)
+        "Starthoek": 25 * radiaal_per_graad,  # degrees (om Aarde)
         "x": 0,
         "y": 0,
     },
@@ -130,14 +131,14 @@ def Planetenposities(t):
         if planeet == "Titan":
             # Correct the initial position of Titan relative to Saturn
             x_s, y_s = cirkelbeweging(Hemellichamen["Saturnus"]["Baanstraal"], Hemellichamen["Saturnus"]["Omlooptijd"],
-                                    Hemellichamen["Saturnus"]["Starthoek"], t)
+                                       Hemellichamen["Saturnus"]["Starthoek"], t)
             x, y = cirkelbeweging(baanstraal, omlooptijd, starthoek, t)
             x += x_s
             y += y_s
         elif planeet == "Maan":
             # Correct the initial position of Moon relative to Earth
             x_e, y_e = cirkelbeweging(Hemellichamen["Aarde"]["Baanstraal"], Hemellichamen["Aarde"]["Omlooptijd"],
-                                    Hemellichamen["Aarde"]["Starthoek"], t)
+                                       Hemellichamen["Aarde"]["Starthoek"], t)
             x, y = cirkelbeweging(baanstraal, omlooptijd, starthoek, t)
             x += x_e
             y += y_e
