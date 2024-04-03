@@ -8,10 +8,11 @@ G = 6.67384*10**-11 # Gravitatieconstante
 t = 0
 MTitanfall = 750    # Massa van onze Titanfall in kg
 
+Limit = 4e12        # Hulpvariabele om de grafiek makkelijker te schalen; e11 is voor aarde/mars, e12 is voor het volledige stelsel
+Tijdstapfactor = 20  # bij Tijdstapfactor = 1 geeft de animatie 1 dag/frame
 x_titanfall = 0
 y_titanfall = 0
-Seconden_in_een_dag = 24*3600
-Seconden_in_een_jaar = Seconden_in_een_dag*365
+Dagen_in_een_jaar = 365
 radiaal_per_graad = 2*Pi/360
 
 # Bibliotheek met al onze startwaarden/constanten
@@ -27,7 +28,7 @@ Hemellichamen = {
     "Aarde": {
         "Massa": 5.972 * 10**24,  # kg
         "Baanstraal": 1.496 * 10**11,  # m
-        "Omlooptijd": 365.256 * Seconden_in_een_dag,  # s
+        "Omlooptijd": 365.256/Tijdstapfactor,  # dag
         "Starthoek": 25 * radiaal_per_graad,  # degrees
         "x": 0,
         "y": 0,
@@ -35,7 +36,7 @@ Hemellichamen = {
     "Mars": {
         "Massa": 6.4171 * 10**23,  # kg
         "Baanstraal": 2.279 * 10**11,  # m
-        "Omlooptijd": 687 * Seconden_in_een_dag,  # s
+        "Omlooptijd": 687/Tijdstapfactor,  # dag
         "Starthoek": 329 * radiaal_per_graad,  # degrees
         "x": 0,
         "y": 0,
@@ -43,7 +44,7 @@ Hemellichamen = {
     "Jupiter": {
         "Massa": 1.8982 * 10**27,  # kg
         "Baanstraal": 7.785 * 10**11,  # m
-        "Omlooptijd": 11.86 * Seconden_in_een_jaar,  # s
+        "Omlooptijd": 11.86 *Dagen_in_een_jaar/Tijdstapfactor,  # dag
         "Starthoek": 185 * radiaal_per_graad,  # degrees
         "x": 0,
         "y": 0,
@@ -51,7 +52,7 @@ Hemellichamen = {
     "Saturnus": {
         "Massa": 5.6834 * 10**26,  # kg
         "Baanstraal": 1.427 * 10**12,  # m
-        "Omlooptijd": 29.45 * Seconden_in_een_jaar,  # s
+        "Omlooptijd": 29.45 * Dagen_in_een_jaar/Tijdstapfactor,  # dag
         "Starthoek": 257 * radiaal_per_graad,  # degrees
         "x": 0,
         "y": 0,
@@ -59,7 +60,7 @@ Hemellichamen = {
     "Uranus": {
         "Massa": 86.8 * 10**24,  # kg
         "Baanstraal": 2.871 * 10**12,  # m
-        "Omlooptijd": 84.01 * Seconden_in_een_jaar,  # s
+        "Omlooptijd": 84.01 * Dagen_in_een_jaar/Tijdstapfactor,  # dag
         "Starthoek": 244 * radiaal_per_graad,  # degrees
         "x": 0,
         "y": 0,
@@ -67,7 +68,7 @@ Hemellichamen = {
     "Neptunus": {
         "Massa": 1.0243 * 10**26,  # kg
         "Baanstraal": 4.498 * 10**12,  # m
-        "Omlooptijd": 164.8 * Seconden_in_een_jaar,  # s
+        "Omlooptijd": 164.8 * Dagen_in_een_jaar/Tijdstapfactor,  # dag
         "Starthoek": 341 * radiaal_per_graad,  # degrees
         "x": 0,
         "y": 0,
@@ -75,7 +76,7 @@ Hemellichamen = {
     "Titan": {
         "Massa": 1.345 * 10**23,  # kg
         "Baanstraal": 1.221931 * 10**9,  # m (om Saturnus)
-        "Omlooptijd": 15.94513889 * Seconden_in_een_dag,  # s (om Saturnus)
+        "Omlooptijd": 15.94513889/Tijdstapfactor,  # dag (om Saturnus)
         "Starthoek": 0,  # degrees (om Saturnus)
         "x": 0,
         "y": 0,
@@ -83,7 +84,7 @@ Hemellichamen = {
     "Maan": {
         "Massa": 0.0735 * 10**24,  # kg
         "Baanstraal": 384.4 * 10**6,  # m (om Aarde)
-        "Omlooptijd": 27.32 * Seconden_in_een_dag,  # s (om Aarde)
+        "Omlooptijd": 27.32/Tijdstapfactor,  # dag(om Aarde)
         "Starthoek": 25 * radiaal_per_graad,  # degrees (om Aarde)
         "x": 0,
         "y": 0,
@@ -108,7 +109,7 @@ def Hoeksnelheid(R, T):
     if T == 0: #delen door 0 beveiliging
         return None
     else:
-        V = (2 * Pi * R) / T
+        V = (2 * Pi) / T
         return V
 
 
@@ -124,7 +125,6 @@ def cirkelbeweging(R, T, Phi, t):
 def Planetenposities(t):
     planeten_locaties = {}
     for planeet, gegevens in Hemellichamen.items():
-        massa = gegevens["Massa"]
         baanstraal = gegevens["Baanstraal"]
         omlooptijd = gegevens["Omlooptijd"]
         starthoek = gegevens["Starthoek"]
@@ -156,9 +156,9 @@ def bewegingTitanfall(Fg_x, Fg_y, a_x, a_y, v_x, v_y,x_titanfall, y_titanfall):
     x_titanfall = x_titanfall+ v_x*t
     y_titanfall = y_titanfall + v_y*t
 
-fig, ax = plt.subplots(figsize = (16,16))
-ax.set_xlim(-4e12, 4e12)
-ax.set_ylim(-4e12, 4e12)
+fig, ax = plt.subplots()
+ax.set_xlim(-Limit, Limit)
+ax.set_ylim(-Limit, Limit)
 scat = ax.scatter([], [], s=10)
 all_positions = []
 
@@ -169,6 +169,7 @@ def init():
     return scat,
 
 def update(frame):
+    print(frame)
     global t
     t = frame
     planeten_posities = Planetenposities(t)
@@ -187,6 +188,6 @@ scatters = [ax.scatter([], [], s=50, color=color) for color in colors]
 all_positions = []
 
 # Call FuncAnimation with the updated update() function
-ani = FuncAnimation(fig, update, frames=np.arange(0, Seconden_in_een_jaar), init_func=init, blit=True)
+ani = FuncAnimation(fig, update, frames=np.arange(0, 5000), init_func=init, blit=True)
 plt.legend(loc='upper left')
 plt.show()
