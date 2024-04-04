@@ -12,7 +12,7 @@ t = 0
 MTitanfall = 750    # Massa van onze Titanfall in kg
 
 Limit = 4e12        # Hulpvariabele om de grafiek makkelijker te schalen; e11 is voor aarde/mars, e12 is voor het volledige stelsel
-Tijdstapfactor = 20  # bij Tijdstapfactor = 1 geeft de animatie 1 dag/frame
+Tijdstapfactor = 2  # bij Tijdstapfactor = 1 geeft de animatie 1 dag/frame
 a_x = 0
 a_y = 0
 v_x = 0
@@ -20,7 +20,7 @@ v_y = 0
 Fres_x = 0
 Fres_y = 0
 delta_t = 86400 * Tijdstapfactor # Tijdstap in seconden
-
+Start = False
 Dagen_in_een_jaar = 365
 radiaal_per_graad = 2*Pi/360
 
@@ -102,6 +102,9 @@ Hemellichamen = {
 # Define a colormap and get colors for each planet
 cmap = get_cmap('tab10')
 colors = [cmap(i) for i in range(len(Hemellichamen)+1)]
+LEO = 2000e3           #2000km
+T_LEO = 2*Pi*(LEO**1.5)/(G*Hemellichamen["Aarde"]["Massa"])**0.5              #Gravitatiekracht = Fmpz
+
 
 def Hoeksnelheid(R, T):
     if T == 0: #delen door 0 beveiliging
@@ -182,8 +185,16 @@ def Fres():
         Fres_x += Fg_x
         Fres_y += Fg_y
 
-def bewegingTitanfall():
+def bewegingTitanfall(t):
     global a_x, a_y, v_x, v_y, x_titanfall, y_titanfall, Fres_x, Fres_y
+
+    while Start != True:
+        x_e, y_e = cirkelbeweging(Hemellichamen["Aarde"]["Baanstraal"], Hemellichamen["Aarde"]["Omlooptijd"],
+                                       Hemellichamen["Aarde"]["Starthoek"], t)
+        x_titanfall, y_titanfall = cirkelbeweging(LEO, T_LEO, 0,t)
+        x_titanfall, y_titanfall =+ x_e, y_e
+
+    
     a_x = Fres_x/MTitanfall 
     a_y = Fres_y/MTitanfall
     v_x = v_x + a_x*delta_t
@@ -229,12 +240,13 @@ def update(frame):
     # Calculate force and update Titanfall's position, velocity, and acceleration
     Fres()
 
-    bewegingTitanfall()
+    bewegingTitanfall(t)
     
     # Update Titanfall's position on the plot
     scat.set_offsets([[x_titanfall, y_titanfall]])
     scatters.append(scat)
     return scatters
+
 
 # Create scatter plots for each planet
 scatters = [ax.scatter([], [], s=50, color=color) for color in colors]
