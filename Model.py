@@ -4,6 +4,7 @@ from matplotlib.animation import FuncAnimation
 from matplotlib.cm import get_cmap
 from matplotlib.collections import LineCollection
 
+# @@ atm gaat er wat mis met de berekening van Fres_x en Fres_y. Deze waarden zijn te klein voor de werkelijkheid.
 
 Pi = np.pi
 G = 6.67384*10**-11 # Gravitatieconstante
@@ -16,8 +17,9 @@ a_x = 0
 a_y = 0
 v_x = 0
 v_y = 0
-F_net_x = 0
-F_net_y = 0
+Fres_x = 0
+Fres_y = 0
+delta_t = 86400 * Tijdstapfactor # Tijdstap in seconden
 
 Dagen_in_een_jaar = 365
 radiaal_per_graad = 2*Pi/360
@@ -99,7 +101,7 @@ Hemellichamen = {
 }
 # Define a colormap and get colors for each planet
 cmap = get_cmap('tab10')
-colors = [cmap(i) for i in range(len(Hemellichamen))]
+colors = [cmap(i) for i in range(len(Hemellichamen)+1)]
 
 def Hoeksnelheid(R, T):
     if T == 0: #delen door 0 beveiliging
@@ -164,9 +166,10 @@ def Newton(MPlaneet, R, alfa):
     return Fg_x, Fg_y
 
 # hoofdfunctie voor de resulterende kracht
-def Fres(x_titanfall, y_titanfall):
-    F_net_x = 0
-    F_net_y = 0
+def Fres():
+    global Fres_x, Fres_y, x_titanfall, y_titanfall
+    Fres_x = 0
+    Fres_y = 0
 
     for planet, data in Hemellichamen.items():
         x_planeet = data["x"]
@@ -176,16 +179,22 @@ def Fres(x_titanfall, y_titanfall):
         alfa = Hoekalfa(x_planeet, y_planeet, x_titanfall, y_titanfall)
         Fg_x, Fg_y = Newton(MPlaneet, R, alfa)
         
-        F_net_x += Fg_x
-        F_net_y += Fg_y
+        Fres_x += Fg_x
+        Fres_y += Fg_y
 
-def bewegingTitanfall(Fg_x, Fg_y, a_x, a_y, v_x, v_y,x_titanfall, y_titanfall):
-    a_x = a_x + Fg_x/MTitanfall 
-    a_y = a_y + Fg_y/MTitanfall
-    v_x = v_x + a_x*t
-    v_y = v_y + a_y*t
-    x_titanfall = x_titanfall+ v_x*t
-    y_titanfall = y_titanfall + v_y*t
+def bewegingTitanfall():
+    global a_x, a_y, v_x, v_y, x_titanfall, y_titanfall, Fres_x, Fres_y
+    a_x = Fres_x/MTitanfall 
+    a_y = Fres_y/MTitanfall
+    v_x = v_x + a_x*delta_t
+    v_y = v_y + a_y*delta_t
+    x_titanfall = x_titanfall+ v_x*delta_t
+    y_titanfall = y_titanfall + v_y*delta_t
+    print('---------------------------------------------------------------------------------------------')
+    print('x_titanfall:', x_titanfall, 'y_titanfall:', y_titanfall)
+    print('v_x:', v_x, 'v_y:', v_y)
+    print('a_x:', a_x, 'a_y:', a_y)
+    print('fg_x:', Fres_x, 'fg_y:', Fres_y)
 
 fig, ax = plt.subplots()
 ax.set_xlim(-Limit, Limit)
@@ -207,8 +216,8 @@ def init():
 
 def update(frame):
     global t, x_titanfall, y_titanfall  # Declare global variables
-    global a_x, a_y, v_x, v_y, F_net_x, F_net_y  # Declare global variables
-    
+    global a_x, a_y, v_x, v_y, Fres_x, Fres_y  # Declare global variables
+
     t = frame
     planeten_posities = Planetenposities(t)
     for i, (planet, color) in enumerate(zip(Hemellichamen.keys(), colors)):
@@ -218,19 +227,17 @@ def update(frame):
         scatters[i].set_offsets([[x_current, y_current]])
     
     # Calculate force and update Titanfall's position, velocity, and acceleration
-    Fres(x_titanfall, y_titanfall)
-    bewegingTitanfall(F_net_x, F_net_y, a_x, a_y, v_x, v_y, x_titanfall, y_titanfall)
+    Fres()
+
+    bewegingTitanfall()
     
     # Update Titanfall's position on the plot
     scat.set_offsets([[x_titanfall, y_titanfall]])
-    
-    return scatters + [scat]
+    scatters.append(scat)
+    return scatters
 
 # Create scatter plots for each planet
 scatters = [ax.scatter([], [], s=50, color=color) for color in colors]
-
-# Initialize all_positions list to store positions for each planet
-all_positions = []
 
 # Call FuncAnimation with the updated update() function
 ani = FuncAnimation(fig, update, frames=np.arange(0, 5000), init_func=init, blit=True)
