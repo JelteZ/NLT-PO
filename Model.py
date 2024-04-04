@@ -12,9 +12,13 @@ MTitanfall = 750    # Massa van onze Titanfall in kg
 
 Limit = 4e12        # Hulpvariabele om de grafiek makkelijker te schalen; e11 is voor aarde/mars, e12 is voor het volledige stelsel
 Tijdstapfactor = 20  # bij Tijdstapfactor = 1 geeft de animatie 1 dag/frame
-
+a_x = 0
+a_y = 0
+v_x = 0
+v_y = 0
 F_net_x = 0
 F_net_y = 0
+
 Dagen_in_een_jaar = 365
 radiaal_per_graad = 2*Pi/360
 
@@ -161,7 +165,8 @@ def Newton(MPlaneet, R, alfa):
 
 # hoofdfunctie voor de resulterende kracht
 def Fres(x_titanfall, y_titanfall):
-  
+    F_net_x = 0
+    F_net_y = 0
 
     for planet, data in Hemellichamen.items():
         x_planeet = data["x"]
@@ -173,8 +178,6 @@ def Fres(x_titanfall, y_titanfall):
         
         F_net_x += Fg_x
         F_net_y += Fg_y
-
-    return F_net_x, F_net_y
 
 def bewegingTitanfall(Fg_x, Fg_y, a_x, a_y, v_x, v_y,x_titanfall, y_titanfall):
     a_x = a_x + Fg_x/MTitanfall 
@@ -204,6 +207,7 @@ def init():
 
 def update(frame):
     global t, x_titanfall, y_titanfall  # Declare global variables
+    global a_x, a_y, v_x, v_y, F_net_x, F_net_y  # Declare global variables
     
     t = frame
     planeten_posities = Planetenposities(t)
@@ -214,8 +218,8 @@ def update(frame):
         scatters[i].set_offsets([[x_current, y_current]])
     
     # Calculate force and update Titanfall's position, velocity, and acceleration
-    F_net_x, F_net_y = Fres(x_titanfall, y_titanfall)
-    a_x, a_y, v_x, v_y, x_titanfall, y_titanfall = bewegingTitanfall(F_net_x, F_net_y, a_x, a_y, v_x, v_y, x_titanfall, y_titanfall)
+    Fres(x_titanfall, y_titanfall)
+    bewegingTitanfall(F_net_x, F_net_y, a_x, a_y, v_x, v_y, x_titanfall, y_titanfall)
     
     # Update Titanfall's position on the plot
     scat.set_offsets([[x_titanfall, y_titanfall]])
