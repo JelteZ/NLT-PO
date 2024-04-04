@@ -170,9 +170,11 @@ def init():
         all_positions.append([])  # Initialize all_positions list for each planet
         # Add circles representing orbits with respective planet color
         orbit_radius = Hemellichamen[planet]["Baanstraal"]
-        orbit_circle = plt.Circle((0, 0), orbit_radius, color=color, fill=False)
-        ax.add_artist(orbit_circle)
+        if planet not in ["Titan", "Maan"]:  # Exclude Titan and the Moon
+            orbit_circle = plt.Circle((0, 0), orbit_radius, color=color, fill=False)
+            ax.add_artist(orbit_circle)
     return scat,
+
 
 def update(frame):
     global t
