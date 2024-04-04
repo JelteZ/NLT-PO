@@ -168,6 +168,10 @@ def init():
     for i, (planet, color) in enumerate(zip(Hemellichamen.keys(), colors)):
         ax.scatter([], [], s=10, color=color, label=planet)
         all_positions.append([])  # Initialize all_positions list for each planet
+        # Add circles representing orbits with respective planet color
+        orbit_radius = Hemellichamen[planet]["Baanstraal"]
+        orbit_circle = plt.Circle((0, 0), orbit_radius, color=color, fill=False)
+        ax.add_artist(orbit_circle)
     return scat,
 
 def update(frame):
@@ -179,16 +183,10 @@ def update(frame):
         x_current = planeten_posities[planet]["x"]
         y_current = planeten_posities[planet]["y"]
         scatters[i].set_offsets([[x_current, y_current]])
-
-        # Voeg vorige posities als dunne lijnen toe
-        all_positions[i].append([x_current, y_current])
-        all_positions_to_plot = np.array(all_positions[i])
-        if len(all_positions_to_plot) > 1:
-            segments = [all_positions_to_plot[:-1], all_positions_to_plot[1:]]
-            lines = LineCollection(segments, colors=color, linewidths=0.5)
-            ax.add_collection(lines)
-
     return scatters
+
+
+
 
 
 
