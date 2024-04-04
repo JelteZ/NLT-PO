@@ -12,8 +12,9 @@ MTitanfall = 750    # Massa van onze Titanfall in kg
 
 Limit = 4e12        # Hulpvariabele om de grafiek makkelijker te schalen; e11 is voor aarde/mars, e12 is voor het volledige stelsel
 Tijdstapfactor = 20  # bij Tijdstapfactor = 1 geeft de animatie 1 dag/frame
-x_titanfall = 0
-y_titanfall = 0
+
+F_net_x = 0
+F_net_y = 0
 Dagen_in_een_jaar = 365
 radiaal_per_graad = 2*Pi/360
 
@@ -96,17 +97,6 @@ Hemellichamen = {
 cmap = get_cmap('tab10')
 colors = [cmap(i) for i in range(len(Hemellichamen))]
 
-def Hoekalfa(x_planeet, y_planeet, x_titanfall, y_titanfall):
-    alfa = np.arctan((y_planeet-y_titanfall)/(x_planeet-x_titanfall))
-    return alfa
-
-# De functie voor de zwaartekracht van de planeet
-def Newton(MPlaneet, R, alfa):
-
-    Fg_x = np.cos(alfa)*(G*MTitanfall*MPlaneet)/R**2 # Hierin is alfa de hoek tussen de lijn Titanfall - planeet en de x-as
-    Fg_y = np.sin(alfa)*(G*MTitanfall*MPlaneet)/R**2
-
-    return Fg_x, Fg_y
 def Hoeksnelheid(R, T):
     if T == 0: #delen door 0 beveiliging
         return None
@@ -123,7 +113,15 @@ def cirkelbeweging(R, T, Phi, t):
         return x, y
     else:
         return 0, 0 # Valbeveiliging voor de Zon
+altitude_LEO = 200e3
+x_LEO, y_LEO = cirkelbeweging(Hemellichamen["Aarde"]["Baanstraal"] + altitude_LEO, 
+                              Hemellichamen["Aarde"]["Omlooptijd"], 
+                              Hemellichamen["Aarde"]["Starthoek"], 
+                              t)
 
+# Set the initial position of Titanfall
+x_titanfall = x_LEO
+y_titanfall = y_LEO
 def Planetenposities(t):
     planeten_locaties = {}
     for planeet, gegevens in Hemellichamen.items():
@@ -149,6 +147,34 @@ def Planetenposities(t):
         planeten_locaties[planeet] = {"x": x, "y": y}
     return planeten_locaties
 
+def Hoekalfa(x_planeet, y_planeet, x_titanfall, y_titanfall):
+    alfa = np.arctan((y_planeet-y_titanfall)/(x_planeet-x_titanfall))
+    return alfa
+
+# De functie voor de zwaartekracht van de planeet
+def Newton(MPlaneet, R, alfa):
+
+    Fg_x = np.cos(alfa)*(G*MTitanfall*MPlaneet)/R**2 # Hierin is alfa de hoek tussen de lijn Titanfall - planeet en de x-as
+    Fg_y = np.sin(alfa)*(G*MTitanfall*MPlaneet)/R**2
+
+    return Fg_x, Fg_y
+
+# hoofdfunctie voor de resulterende kracht
+def Fres(x_titanfall, y_titanfall):
+  
+
+    for planet, data in Hemellichamen.items():
+        x_planeet = data["x"]
+        y_planeet = data["y"]
+        MPlaneet = data["Massa"]
+        R = np.sqrt((x_planeet - x_titanfall)**2 + (y_planeet - y_titanfall)**2)
+        alfa = Hoekalfa(x_planeet, y_planeet, x_titanfall, y_titanfall)
+        Fg_x, Fg_y = Newton(MPlaneet, R, alfa)
+        
+        F_net_x += Fg_x
+        F_net_y += Fg_y
+
+    return F_net_x, F_net_y
 
 def bewegingTitanfall(Fg_x, Fg_y, a_x, a_y, v_x, v_y,x_titanfall, y_titanfall):
     a_x = a_x + Fg_x/MTitanfall 
@@ -177,7 +203,8 @@ def init():
 
 
 def update(frame):
-    global t
+    global t, x_titanfall, y_titanfall  # Declare global variables
+    
     t = frame
     planeten_posities = Planetenposities(t)
     for i, (planet, color) in enumerate(zip(Hemellichamen.keys(), colors)):
@@ -185,13 +212,15 @@ def update(frame):
         x_current = planeten_posities[planet]["x"]
         y_current = planeten_posities[planet]["y"]
         scatters[i].set_offsets([[x_current, y_current]])
-    return scatters
-
-
-
-
-
-
+    
+    # Calculate force and update Titanfall's position, velocity, and acceleration
+    F_net_x, F_net_y = Fres(x_titanfall, y_titanfall)
+    a_x, a_y, v_x, v_y, x_titanfall, y_titanfall = bewegingTitanfall(F_net_x, F_net_y, a_x, a_y, v_x, v_y, x_titanfall, y_titanfall)
+    
+    # Update Titanfall's position on the plot
+    scat.set_offsets([[x_titanfall, y_titanfall]])
+    
+    return scatters + [scat]
 
 # Create scatter plots for each planet
 scatters = [ax.scatter([], [], s=50, color=color) for color in colors]
