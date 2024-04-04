@@ -2,6 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from matplotlib.cm import get_cmap
+from matplotlib.collections import LineCollection
+
 
 Pi = np.pi
 G = 6.67384*10**-11 # Gravitatieconstante
@@ -169,19 +171,26 @@ def init():
     return scat,
 
 def update(frame):
-    print(frame)
     global t
     t = frame
     planeten_posities = Planetenposities(t)
     for i, (planet, color) in enumerate(zip(Hemellichamen.keys(), colors)):
-        positions = np.array([[planeten_posities[planet]["x"], planeten_posities[planet]["y"]]])
-        all_positions[i].append(positions)
-        all_positions_to_plot = np.concatenate(all_positions[i], axis=0)
-        scatters[i].set_offsets(all_positions_to_plot)
-    print(f"all_positions_to_plot {all_positions_to_plot}")  
-    print(f"all_positions {all_positions}")
-    print(f"scatters {scatters}")  
+        # Voeg huidige positie als stip toe
+        x_current = planeten_posities[planet]["x"]
+        y_current = planeten_posities[planet]["y"]
+        scatters[i].set_offsets([[x_current, y_current]])
+
+        # Voeg vorige posities als dunne lijnen toe
+        all_positions[i].append([x_current, y_current])
+        all_positions_to_plot = np.array(all_positions[i])
+        if len(all_positions_to_plot) > 1:
+            segments = [all_positions_to_plot[:-1], all_positions_to_plot[1:]]
+            lines = LineCollection(segments, colors=color, linewidths=0.5)
+            ax.add_collection(lines)
+
     return scatters
+
+
 
 
 # Create scatter plots for each planet
