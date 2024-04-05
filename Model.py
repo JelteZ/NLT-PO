@@ -24,17 +24,16 @@ delta_t = 86400 * Tijdstapfactor # Tijdstap in seconden
 # Knop om te beginnen
 control_panel_ax = plt.axes([0.7, 0.05, 0.1, 0.05])  # [left, bottom, width, height]
 start_button = plt.Button(control_panel_ax, 'Start')
-start_text = plt.text(0.7, 0.1, 'Start = False', fontsize=16)
 Start = False 
 
 Dagen_in_een_jaar = 365
 radiaal_per_graad = 2*Pi/360
 
 def on_start_button_clicked(event):
-    global Start
+    global Start, start_text
     if Start == False:
         Start = True
-        
+
     elif Start == True:
         Start = False
 
@@ -207,7 +206,6 @@ def Fres():
 
 def bewegingTitanfall(t):
     global a_x, a_y, v_x, v_y, x_titanfall, y_titanfall, Fres_x, Fres_y
-    start_text.set_text('Start: {}'.format(Start))
 
     if Start != True:
         x_e, y_e = cirkelbeweging(Hemellichamen["Aarde"]["Baanstraal"], Hemellichamen["Aarde"]["Omlooptijd"],
