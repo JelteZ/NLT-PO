@@ -22,17 +22,25 @@ Fres_y = 0
 delta_t = 86400 * Tijdstapfactor # Tijdstap in seconden
 
 # Knop om te beginnen
-start_button_ax = plt.axes([0.7, 0.05, 0.1, 0.05])  # [left, bottom, width, height]
-start_button = plt.Button(start_button_ax, 'Start')
-Start = False
+control_panel_ax = plt.axes([0.7, 0.05, 0.1, 0.05])  # [left, bottom, width, height]
+start_button = plt.Button(control_panel_ax, 'Start')
+start_text = plt.text(0.7, 0.1, 'Start = False', fontsize=16)
+Start = False 
+
 Dagen_in_een_jaar = 365
 radiaal_per_graad = 2*Pi/360
 
 def on_start_button_clicked(event):
     global Start
-    Start = True
+    if Start == False:
+        Start = True
+        
+    elif Start == True:
+        Start = False
 
-    start_button.on_clicked(on_start_button_clicked)
+    print('Start button clicked! Start =', Start)
+
+start_button.on_clicked(on_start_button_clicked)
 
 # Bibliotheek met al onze startwaarden/constanten
 Hemellichamen = {
@@ -109,6 +117,7 @@ Hemellichamen = {
         "y": 0,
     },
 }
+
 # Define a colormap and get colors for each planet
 cmap = get_cmap('tab10')
 colors = [cmap(i) for i in range(len(Hemellichamen)+1)]
@@ -132,6 +141,7 @@ def cirkelbeweging(R, T, Phi, t):
         return x, y
     else:
         return 0, 0 # Valbeveiliging voor de Zon
+
 altitude_LEO = 200e3
 x_LEO, y_LEO = cirkelbeweging(Hemellichamen["Aarde"]["Baanstraal"] + altitude_LEO, 
                               Hemellichamen["Aarde"]["Omlooptijd"], 
@@ -141,6 +151,7 @@ x_LEO, y_LEO = cirkelbeweging(Hemellichamen["Aarde"]["Baanstraal"] + altitude_LE
 # Set the initial position of Titanfall
 x_titanfall = x_LEO
 y_titanfall = y_LEO
+
 def Planetenposities(t):
     planeten_locaties = {}
     for planeet, gegevens in Hemellichamen.items():
@@ -172,7 +183,6 @@ def Hoekalfa(x_planeet, y_planeet, x_titanfall, y_titanfall):
 
 # De functie voor de zwaartekracht van de planeet
 def Newton(MPlaneet, R, alfa):
-
     Fg_x = np.cos(alfa)*(G*MTitanfall*MPlaneet)/R**2 # Hierin is alfa de hoek tussen de lijn Titanfall - planeet en de x-as
     Fg_y = np.sin(alfa)*(G*MTitanfall*MPlaneet)/R**2
 
@@ -197,6 +207,7 @@ def Fres():
 
 def bewegingTitanfall(t):
     global a_x, a_y, v_x, v_y, x_titanfall, y_titanfall, Fres_x, Fres_y
+    start_text.set_text('Start: {}'.format(Start))
 
     if Start != True:
         x_e, y_e = cirkelbeweging(Hemellichamen["Aarde"]["Baanstraal"], Hemellichamen["Aarde"]["Omlooptijd"],
@@ -237,7 +248,7 @@ def init():
 def update(frame):
     global t, x_titanfall, y_titanfall  # Declare global variables
     global a_x, a_y, v_x, v_y, Fres_x, Fres_y  # Declare global variables
-
+    
     t = frame
     planeten_posities = Planetenposities(t)
     for i, (planet, color) in enumerate(zip(Hemellichamen.keys(), colors)):
