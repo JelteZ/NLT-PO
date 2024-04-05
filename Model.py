@@ -198,24 +198,23 @@ def Fres():
 def bewegingTitanfall(t):
     global a_x, a_y, v_x, v_y, x_titanfall, y_titanfall, Fres_x, Fres_y
 
-    while Start != True:
+    if Start != True:
         x_e, y_e = cirkelbeweging(Hemellichamen["Aarde"]["Baanstraal"], Hemellichamen["Aarde"]["Omlooptijd"],
                                        Hemellichamen["Aarde"]["Starthoek"], t)
         x_titanfall, y_titanfall = cirkelbeweging(LEO, T_LEO, 0,t)
         x_titanfall, y_titanfall =+ x_e, y_e
-
-    
-    a_x = Fres_x/MTitanfall 
-    a_y = Fres_y/MTitanfall
-    v_x = v_x + a_x*delta_t
-    v_y = v_y + a_y*delta_t
-    x_titanfall = x_titanfall+ v_x*delta_t
-    y_titanfall = y_titanfall + v_y*delta_t
-    print('---------------------------------------------------------------------------------------------')
-    print('x_titanfall:', x_titanfall, 'y_titanfall:', y_titanfall)
-    print('v_x:', v_x, 'v_y:', v_y)
-    print('a_x:', a_x, 'a_y:', a_y)
-    print('fg_x:', Fres_x, 'fg_y:', Fres_y)
+    else:
+        a_x = Fres_x/MTitanfall 
+        a_y = Fres_y/MTitanfall
+        v_x = v_x + a_x*delta_t
+        v_y = v_y + a_y*delta_t
+        x_titanfall = x_titanfall+ v_x*delta_t
+        y_titanfall = y_titanfall + v_y*delta_t
+        print('---------------------------------------------------------------------------------------------')
+        print('x_titanfall:', x_titanfall, 'y_titanfall:', y_titanfall)
+        print('v_x:', v_x, 'v_y:', v_y)
+        print('a_x:', a_x, 'a_y:', a_y)
+        print('fg_x:', Fres_x, 'fg_y:', Fres_y)
 
 fig, ax = plt.subplots()
 ax.set_xlim(-Limit, Limit)
