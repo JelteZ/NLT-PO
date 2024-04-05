@@ -11,7 +11,7 @@ G = 6.67384*10**-11 # Gravitatieconstante
 t = 0
 MTitanfall = 750    # Massa van onze Titanfall in kg
 
-Limit = 4e12        # Hulpvariabele om de grafiek makkelijker te schalen; e11 is voor aarde/mars, e12 is voor het volledige stelsel
+Limit = 4e12        # Hulpvariabele om de grafiek makkelijker te schalen; e11 is voor aarde/mars, e12 is voor het volledige stelsel (in meters)
 Tijdstapfactor = 2  # bij Tijdstapfactor = 1 geeft de animatie 1 dag/frame
 a_x = 0
 a_y = 0
@@ -20,16 +20,26 @@ v_y = 0
 Fres_x = 0
 Fres_y = 0
 delta_t = 86400 * Tijdstapfactor # Tijdstap in seconden
+
+# Knop om te beginnen
+start_button_ax = plt.axes([0.7, 0.05, 0.1, 0.05])  # [left, bottom, width, height]
+start_button = plt.Button(start_button_ax, 'Start')
 Start = False
 Dagen_in_een_jaar = 365
 radiaal_per_graad = 2*Pi/360
+
+def on_start_button_clicked(event):
+    global Start
+    Start = True
+
+    start_button.on_clicked(on_start_button_clicked)
 
 # Bibliotheek met al onze startwaarden/constanten
 Hemellichamen = {
     "Zon": {
         "Massa": 1.9884 * 10**30,  # kg
         "Baanstraal": 0,  # Nvt voor de zon
-        "Omlooptijd": 0,  # Nvt voor de zon
+        "Omlooptijd": 0,  # Nvt voor de zon 
         "Starthoek": 0,  # Nvt voor de zon
         "x": 0,
         "y": 0,
@@ -103,7 +113,7 @@ Hemellichamen = {
 cmap = get_cmap('tab10')
 colors = [cmap(i) for i in range(len(Hemellichamen)+1)]
 LEO = 2000e3           #2000km
-T_LEO = 2*Pi*(LEO**1.5)/(G*Hemellichamen["Aarde"]["Massa"])**0.5              #Gravitatiekracht = Fmpz
+T_LEO = 2*Pi*(LEO**1.5)/(G*Hemellichamen["Aarde"]["Massa"])**0.5              #Gravitatiekracht = Fmpz, met v = 2piR/T
 
 
 def Hoeksnelheid(R, T):
