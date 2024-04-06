@@ -142,7 +142,9 @@ def Fres():
         
         Fres_x += Fg_x
         Fres_y += Fg_y
-        F_xMotor, F_yMotor = F_Motor(200,120)           # TODO mechanisme om input toe te voegen/burns uit te voeren
+    F_xMotor, F_yMotor = F_Motor(200,120)           # TODO mechanisme om input toe te voegen/burns uit te voeren
+    Fres_x += F_xMotor
+    Fres_y += F_yMotor
 
 # Function to update spacecraft position
 # Het berekenen van de oorspronkelijke snelheden van Titanfall middels het differntieren van cirkelbeweging
