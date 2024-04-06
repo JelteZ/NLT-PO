@@ -124,7 +124,7 @@ def Newton(MPlaneet, R, alfa):
 def F_Motor(Magnitude, richting):
     richting = richting * radiaal_per_graad     #conversie naar radialen
     F_xMotor = Magnitude*np.cos(richting)
-    F_yMotor = Magnitude*np.cos(richting)
+    F_yMotor = Magnitude*np.sin(richting)
     return F_xMotor, F_yMotor
 
 def Fres():
