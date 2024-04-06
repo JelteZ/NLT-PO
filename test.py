@@ -146,7 +146,7 @@ v_y = altitude_LEO * np.cos(Hemellichamen["Aarde"]["Starthoek"] + Pi/2) * v_LEO 
 
 
 def bewegingTitanfall(t):
-    global x_titanfall, y_titanfall, v_x, v_y, MTitanfall
+    global x_titanfall, y_titanfall, v_x, v_y, MTitanfall, F_xMotor, F_yMotor
     if Start != True:
         # Spacecraft stays in its initial position
         x_e, y_e = cirkelbeweging(Hemellichamen["Aarde"]["Baanstraal"], Hemellichamen["Aarde"]["Omlooptijd"],
@@ -159,12 +159,15 @@ def bewegingTitanfall(t):
         # Calculate acceleration, velocity, and position of the spacecraft
         a_x = Fres_x / MTitanfall 
         a_y = Fres_y / MTitanfall
+        a_x_Motor = F_xMotor / MTitanfall
+        a_y_Motor = F_yMotor / MTitanfall
         v_x = v_x + a_x * delta_t
         v_y = v_y + a_y * delta_t
+
         x_titanfall = x_titanfall + v_x * delta_t
         y_titanfall = y_titanfall + v_y * delta_t
 
-        Opgebrande_brandstof = Brandstof(t)
+        Opgebrande_brandstof = Brandstof(a_x_Motor, a_y_Motor)
         MTitanfall -= Opgebrande_brandstof
 
         print("Net forces (Fres_x, Fres_Y): ", Fres_x, Fres_y)
@@ -172,20 +175,18 @@ def bewegingTitanfall(t):
         print("Velocity components (v_x, v_y):", v_x, v_y)
         print("Spacecraft position (x_titanfall, y_titanfall):", x_titanfall, y_titanfall)
 
-def bereken_delta_v(v_begin, v_eind):
-    return np.sqrt((v_eind[0]-v_begin[0])**2 + (v_eind[1] - v_begin[1])**2)     #index 0 is v_x, index 1 is v_y
+def bereken_delta_v(a_x, a_y):
+    return np.sqrt((a_x*delta_t)**2 + (a_y*delta_t)**2)     #index 0 is v_x, index 1 is v_y
 
 def bereken_arbeid(delta_v, massa):
     return 0.5 * massa * (delta_v)**2       # W = F*x = ∫Fdx = ∫madx = ∫m dv/dt dx = m∫vdv = 0.5mv² = Ek
 
-def Brandstof(t):
+def Brandstof(a_x_Motor, a_y_Motor):
     Methane_density = 0.72      #kg/m³
     Methaan_stookwaarde = 35.8e6    #J/m³
     Methaan_stookwaarde_per_kg = Methaan_stookwaarde/Methane_density    #J/kg
 
-    v_begin = (v_x, v_y) 
-    v_eind = (v_x, v_y)
-    delta_v = bereken_delta_v(v_begin, v_eind)
+    delta_v = bereken_delta_v(a_x_Motor, a_y_Motor)
     arbeid = bereken_arbeid(delta_v, MTitanfall)
     Massa_brandstof = arbeid/Methaan_stookwaarde_per_kg         #J/J/kg = kg methaan
 
