@@ -6,7 +6,7 @@ from matplotlib.cm import get_cmap
 # Constants
 Pi = np.pi
 G = 6.67384e-11  # Gravitational constant
-MTitanfall = 750  # Mass of the spacecraft in kg
+MTitanfall = 3000  # Mass of the spacecraft in kg
 Limit = 8e12  # Graph limit in meters
 Tijdstapfactor = 1  # Time step factor
 delta_t = 86400 * Tijdstapfactor  # Tijdstappen in dagen
@@ -146,7 +146,7 @@ v_y = altitude_LEO * np.cos(Hemellichamen["Aarde"]["Starthoek"] + Pi/2) * v_LEO 
 
 
 def bewegingTitanfall(t):
-    global x_titanfall, y_titanfall, v_x, v_y
+    global x_titanfall, y_titanfall, v_x, v_y, MTitanfall
     if Start != True:
         # Spacecraft stays in its initial position
         x_e, y_e = cirkelbeweging(Hemellichamen["Aarde"]["Baanstraal"], Hemellichamen["Aarde"]["Omlooptijd"],
@@ -163,10 +163,33 @@ def bewegingTitanfall(t):
         v_y = v_y + a_y * delta_t
         x_titanfall = x_titanfall + v_x * delta_t
         y_titanfall = y_titanfall + v_y * delta_t
+
+        Opgebrande_brandstof = Brandstof(t)
+        MTitanfall -= Opgebrande_brandstof
+
         print("Net forces (Fres_x, Fres_Y): ", Fres_x, Fres_y)
         print("Acceleration (a_x, a_y):", a_x, a_y)
         print("Velocity components (v_x, v_y):", v_x, v_y)
         print("Spacecraft position (x_titanfall, y_titanfall):", x_titanfall, y_titanfall)
+
+def bereken_delta_v(v_begin, v_eind):
+    return np.sqrt((v_eind[0]-v_begin[0])**2 + (v_eind[1] - v_begin[1])**2)     #index 0 is v_x, index 1 is v_y
+
+def bereken_arbeid(delta_v, massa):
+    return 0.5 * massa * (delta_v)**2       # W = F*x = ∫Fdx = ∫madx = ∫m dv/dt dx = m∫vdv = 0.5mv² = Ek
+
+def Brandstof(t):
+    Methane_density = 0.72      #kg/m³
+    Methaan_stookwaarde = 35.8e6    #J/m³
+    Methaan_stookwaarde_per_kg = Methaan_stookwaarde/Methane_density    #J/kg
+
+    v_begin = (v_x, v_y) 
+    v_eind = (v_x, v_y)
+    delta_v = bereken_delta_v(v_begin, v_eind)
+    arbeid = bereken_arbeid(delta_v, MTitanfall)
+    Massa_brandstof = arbeid/Methaan_stookwaarde_per_kg         #J/J/kg = kg methaan
+
+    return Massa_brandstof
 
 
 # Initialize the plot
