@@ -196,8 +196,8 @@ def Hoekalfa(x_planeet, y_planeet, x_titanfall, y_titanfall):
 
 # De functie voor de zwaartekracht van de planeet
 def Newton(MPlaneet, R, alfa):
-    Fg_x = np.cos(alfa)*(G*MTitanfall*MPlaneet)/R**2 # Hierin is alfa de hoek tussen de lijn Titanfall - planeet en de x-as
-    Fg_y = np.sin(alfa)*(G*MTitanfall*MPlaneet)/R**2
+    Fg_x = -np.cos(alfa)*(G*MTitanfall*MPlaneet)/R**2 # Hierin is alfa de hoek tussen de lijn Titanfall - planeet en de x-as
+    Fg_y = -np.sin(alfa)*(G*MTitanfall*MPlaneet)/R**2
 
     return Fg_x, Fg_y
 

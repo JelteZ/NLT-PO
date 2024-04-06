@@ -7,9 +7,9 @@ from matplotlib.cm import get_cmap
 Pi = np.pi
 G = 6.67384e-11  # Gravitational constant
 MTitanfall = 750  # Mass of the spacecraft in kg
-Limit = 4e12  # Graph limit in meters
+Limit = 8e12  # Graph limit in meters
 Tijdstapfactor = 1  # Time step factor
-delta_t = 86400 * Tijdstapfactor  # Time step in seconds
+delta_t = 86400 * Tijdstapfactor  # Tijdstappen in dagen
 
 # Button to start simulation
 control_panel_ax = plt.axes([0.7, 0.05, 0.1, 0.05])  # [left, bottom, width, height]
@@ -55,7 +55,7 @@ def Hoeksnelheid(R, T):
     if T == 0:
         return None
     else:
-        V = (2 * Pi) / T
+        V = (2 * Pi) / T        # Met T in dagen, dus V in radialen/dag
         return V
 
 # Function for circular motion
@@ -66,7 +66,7 @@ def cirkelbeweging(R, T, Phi, t):
         y = R * np.sin(V * t + Phi)
         return x, y
     else:
-        return 0, 0  # Default value for invalid cases
+        return 0, 0  # valbeveiliging zon
 
 # Set the initial position of Titanfall
 Straal_Aarde = 6.371e6      # Meters
@@ -115,8 +115,8 @@ def Hoekalfa(x_planeet, y_planeet, x_titanfall, y_titanfall):
 
 # Function to calculate gravitational force
 def Newton(MPlaneet, R, alfa):
-    Fg_x = np.cos(alfa) * (G * MTitanfall * MPlaneet) / R**2
-    Fg_y = np.sin(alfa) * (G * MTitanfall * MPlaneet) / R**2
+    Fg_x = -np.cos(alfa) * (G * MTitanfall * MPlaneet) / R**2
+    Fg_y = -np.sin(alfa) * (G * MTitanfall * MPlaneet) / R**2
     return Fg_x, Fg_y
 
 # Function to calculate resulting force
@@ -138,10 +138,12 @@ def Fres():
         Fres_y += Fg_y
 
 # Function to update spacecraft position
-# Calculate the initial velocities in LEO
-v_LEO = 2 * Pi * (altitude_LEO) / T_LEO
-v_x = -v_LEO * np.sin(Hemellichamen["Aarde"]["Starthoek"])  # Negative due to direction
-v_y = v_LEO * np.cos(Hemellichamen["Aarde"]["Starthoek"])
+# Het berekenen van de oorspronkelijke snelheden van Titanfall middels het differntieren van cirkelbeweging
+# Initial velocity of Titanfall
+v_LEO = 2 * Pi / T_LEO  # Angular velocity in LEO
+v_x = -altitude_LEO * np.sin(Hemellichamen["Aarde"]["Starthoek"] + Pi/2) * v_LEO  # Tangential velocity component in x-direction
+v_y = altitude_LEO * np.cos(Hemellichamen["Aarde"]["Starthoek"] + Pi/2) * v_LEO  # Tangential velocity component in y-direction
+
 
 def bewegingTitanfall(t):
     global x_titanfall, y_titanfall, v_x, v_y
@@ -161,6 +163,11 @@ def bewegingTitanfall(t):
         v_y = v_y + a_y * delta_t
         x_titanfall = x_titanfall + v_x * delta_t
         y_titanfall = y_titanfall + v_y * delta_t
+        print("Net forces (Fres_x, Fres_Y): ", Fres_x, Fres_y)
+        print("Acceleration (a_x, a_y):", a_x, a_y)
+        print("Velocity components (v_x, v_y):", v_x, v_y)
+        print("Spacecraft position (x_titanfall, y_titanfall):", x_titanfall, y_titanfall)
+
 
 # Initialize the plot
 fig, ax = plt.subplots()
