@@ -34,12 +34,26 @@ def on_start_button_clicked(event):
     if Start == False:
         Start = True
 
+        # afstand aarde-Titanfall totdat er een motor gaat bewegen
+        distance_to_earth = np.sqrt((x_titanfall - Hemellichamen["Aarde"]["x"])**2 + (y_titanfall - Hemellichamen["Aarde"]["y"])**2)
+        
+        # Orbitaalsnelheid 
+        v_orbit_earth = np.sqrt(G * Hemellichamen["Aarde"]["Massa"] / distance_to_earth)
+        
+        # Set the initial velocity of the spacecraft to be tangential to its orbit around Earth
+        v_x = -v_orbit_earth * np.sin(Hoekalfa(Hemellichamen["Aarde"]["x"], Hemellichamen["Aarde"]["y"], x_titanfall, y_titanfall))
+        v_y = v_orbit_earth * np.cos(Hoekalfa(Hemellichamen["Aarde"]["x"], Hemellichamen["Aarde"]["y"], x_titanfall, y_titanfall))
+
+        # Set the initial position of the spacecraft
+        initial_position = (x_titanfall, y_titanfall)
+
     elif Start == True:
         Start = False
 
-    print('Start button clicked! Start =', Start)
+    print('We gaan beginnen! Riemen vast!')
 
 start_button.on_clicked(on_start_button_clicked)
+
 
 # Bibliotheek met al onze startwaarden/constanten
 Hemellichamen = {
@@ -140,8 +154,8 @@ def cirkelbeweging(R, T, Phi, t):
         return x, y
     else:
         return 0, 0 # Valbeveiliging voor de Zon
-
-altitude_LEO = 200e3
+Straal_Aarde = 6.371e6      #Meters
+altitude_LEO = 200e3 + Straal_Aarde
 x_LEO, y_LEO = cirkelbeweging(Hemellichamen["Aarde"]["Baanstraal"] + altitude_LEO, 
                               Hemellichamen["Aarde"]["Omlooptijd"], 
                               Hemellichamen["Aarde"]["Starthoek"], 
