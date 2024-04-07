@@ -39,45 +39,25 @@ Hemellichamen = {
 }
 
 pos_Hemellichamen_t = {
-    "Zon" : {
-        0: {"x" : 0, "y" : 0},
-    },
+    "Zon" : { 0: {"x" : 0, "y" : 0}},
 
-    "Aarde" : {
-        0: {"x" : 0, "y" : 0},
-    },
+    "Aarde" : {0: {"x" : 0, "y" : 0}},
 
-    "Mars": {
-        0: {"x" : 0, "y" : 0},
-    },
+    "Mars" : {0: {"x" : 0, "y" : 0}},
 
-    "Jupiter" : {
-        0: {"x" : 0, "y" : 0},
-    },
+    "Jupiter" : {0: {"x" : 0, "y" : 0}},
 
-    "Saturnus" : {
-        0: {"x" : 0, "y" : 0},
-    },
+    "Saturnus" : {0: {"x" : 0, "y" : 0}},
 
-    "Uranus" : {
-        0: {"x" : 0, "y" : 0},
-    },
+    "Uranus" : {0: {"x" : 0, "y" : 0}},
 
-    "Neptunus" : {
-        0: {"x" : 0, "y" : 0},
-    },
+    "Neptunus" : {0: {"x" : 0, "y" : 0}},
 
-    "Titan" : {
-        0: {"x" : 0, "y" : 0},
-    },
+    "Titan" : {0: {"x" : 0, "y" : 0}},
 
-    "Maan" : {
-        0: {"x" : 0, "y" : 0},
-    },
+    "Maan" : {0: {"x" : 0, "y" : 0}},
 
-    "Titanfall" : {
-        0: {"x" : 0, "y" : 0},
-    }
+    "Titanfall" : {0: {"x" : 0, "y" : 0}}
 }
 
 # Define a colormap and get colors for each planet
@@ -188,6 +168,7 @@ def Fres(t):
 # Doordat de assen gezet zijn zodat titanfall alleen in de y richting beweegt is de x snelheid 0 en is dus alle snelheid y snelheid
 v_x = 0
 v_y = ((2 * Pi * altitude_LEO) / T_LEO) + ((2 * Pi * Hemellichamen["Aarde"]["Baanstraal"])/Hemellichamen["Aarde"]["Omlooptijd"]) # Angular velocity in LEO
+print("v_y_begin =", v_y)
 
 def bewegingTitanfall(t):
     global x_titanfall, y_titanfall, v_x, v_y, MTitanfall, F_xMotor, F_yMotor, Totaal_opgebrande_brandstof
