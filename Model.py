@@ -8,6 +8,10 @@ Pi = np.pi
 G = 6.67384e-12  # Gravitational constant
 MTitanfall = 3000  # Mass of the spacecraft in kg
 
+nietgeweest = True
+volgendekeer = False
+titanfall_x_0 = 0
+titanfall_y_0 = 0
 
 # Number of days in a year and conversion factor for radians
 Dagen_in_een_jaar = 365
@@ -77,7 +81,6 @@ def cirkelbeweging(R, T, Phi, t):
 Straal_Aarde = 6.371e6      # Meters
 altitude_LEO = 200e3 + Straal_Aarde
 T_LEO = 2*Pi*(altitude_LEO**1.5)/(G*Hemellichamen["Aarde"]["Massa"])**0.5       #Gravitatiekracht = Fmpz, met v = 2piR/T
-# print("T_LE0 =", T_LEO)
 x_LEO, y_LEO = cirkelbeweging(Hemellichamen["Aarde"]["Baanstraal"] + altitude_LEO, 
                               Hemellichamen["Aarde"]["Omlooptijd"], 
                               Hemellichamen["Aarde"]["Starthoek"], 
@@ -148,10 +151,6 @@ def Fres(t):
         alfa = Hoekalfa(x_planeet, y_planeet, x_titanfall, y_titanfall)
 
         Fg_x, Fg_y = Newton(MPlaneet, R, alfa)
-        # if planet == "Aarde":
-            # print('x:', x_planeet,"titanfallx:", x_titanfall)
-            # print("min dat:", x_planeet - x_titanfall)
-            # print("MPlaneet =", MPlaneet, "R =", R, "alfa =", alfa, "Fg_x =", Fg_x, "Fg_y =", Fg_y)
         Fres_x += Fg_x
         Fres_y += Fg_y
     
@@ -165,10 +164,22 @@ def Fres(t):
 # Doordat de assen gezet zijn zodat titanfall alleen in de y richting beweegt is de x snelheid 0 en is dus alle snelheid y snelheid
 v_x = 0
 v_y = ((2 * Pi * altitude_LEO) / T_LEO) + ((2 * Pi * Hemellichamen["Aarde"]["Baanstraal"])/Hemellichamen["Aarde"]["Omlooptijd"]) # Angular velocity in LEO
-# print("v_y_begin =", v_y)
 
 def bewegingTitanfall(t):
-    global x_titanfall, y_titanfall, v_x, v_y, MTitanfall, F_xMotor, F_yMotor, Totaal_opgebrande_brandstof
+    global x_titanfall, y_titanfall, v_x, v_y, MTitanfall, F_xMotor, F_yMotor, Totaal_opgebrande_brandstof, nietgeweest, titanfall_x_0, titanfall_y_0, volgendekeer
+    
+    if volgendekeer:
+        verschil_x = titanfall_x_0 - x_titanfall
+        verschil_y = titanfall_y_0 - y_titanfall
+        s = np.sqrt(verschil_x**2 + verschil_y**2)
+        volgendekeer = False
+
+    if nietgeweest:
+        titanfall_x_0 = x_titanfall
+        titanfall_y_0 = y_titanfall
+        nietgeweest = False
+        volgendekeer = True
+    
     # Calculate acceleration, velocity, and position of the spacecraft
     a_x = Fres_x / MTitanfall 
     a_y = Fres_y / MTitanfall
@@ -184,11 +195,6 @@ def bewegingTitanfall(t):
     # Opgebrande_brandstof = Brandstof(a_x_Motor, a_y_Motor)
     # Totaal_opgebrande_brandstof += Opgebrande_brandstof
     # MTitanfall -= Opgebrande_brandstof
-
-    # print("Net forces (Fres_x, Fres_Y): ", Fres_x, Fres_y)
-    # print("Acceleration (a_x, a_y):", a_x, a_y)
-    # print("Velocity components (v_x, v_y):", v_x, v_y)
-    # print("Spacecraft position (x_titanfall, y_titanfall):", x_titanfall, y_titanfall)
     pos_Hemellichamen_t["Titanfall"][round(t, 4)] = {"x": x_titanfall, "y": y_titanfall}
 
 def bereken_delta_v(a_x, a_y):
@@ -225,7 +231,6 @@ def calculate_Values():
     t = 0
     while t <= t_max:
         progress = t / t_max * 100
-        # print(f"{t}/{t_max}\t\t\t\t{progress:.2f}%")
 
         # Calculate force and update spacecraft's position
         Planetenposities(t) 
@@ -257,8 +262,6 @@ def update(frame):
     for i, (planet, color) in enumerate(zip(Hemellichamen.keys(), colors)):
         x_current = pos_Hemellichamen_t[planet][t_current]["x"]
         y_current = pos_Hemellichamen_t[planet][t_current]["y"]
-        # if planet == "Aarde":
-            # print ("Aarde staat op x =", x_current," en y =", y_current)
 
         scatters[i].set_offsets([[x_current, y_current]])
 
