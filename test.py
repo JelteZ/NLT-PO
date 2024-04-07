@@ -31,7 +31,7 @@ Hemellichamen = {
     "Aarde": {"Massa": 5.972e24, "Baanstraal": 1.496e11, "Omlooptijd": 365.256 * Seconden_in_een_dag, "Starthoek": 0 * radiaal_per_graad},
     "Mars": {"Massa": 6.4171e23, "Baanstraal": 2.279e11, "Omlooptijd": 687 * Seconden_in_een_dag, "Starthoek": 304 * radiaal_per_graad},
     "Jupiter": {"Massa": 1.8982e27, "Baanstraal": 7.785e11, "Omlooptijd": 11.86 * Dagen_in_een_jaar * Seconden_in_een_dag, "Starthoek": 160 * radiaal_per_graad},
-    "Saturnus": {"Massa": 5.6834e26, "Baanstraal": 1.427e12, "Omlooptijd": 29.45 * Dagen_in_een_jaar * Seconden_in_een_dag, "Starthoek": 105.1 * radiaal_per_graad},
+    "Saturnus": {"Massa": 5.6834e26, "Baanstraal": 1.427e12, "Omlooptijd": 29.45 * Dagen_in_een_jaar * Seconden_in_een_dag, "Starthoek": (360-105.1) * radiaal_per_graad},
     "Uranus": {"Massa": 86.8e24, "Baanstraal": 2.871e12, "Omlooptijd": 84.01 * Dagen_in_een_jaar * Seconden_in_een_dag, "Starthoek": 219 * radiaal_per_graad,},
     "Neptunus": {"Massa": 1.0243e26, "Baanstraal": 4.498e12, "Omlooptijd": 164.8 * Dagen_in_een_jaar * Seconden_in_een_dag, "Starthoek": 316 * radiaal_per_graad},
     "Titan": {"Massa": 1.345e23, "Baanstraal": 1.221931e9, "Omlooptijd": 15.94513889 * Seconden_in_een_dag, "Starthoek": 335,},
@@ -40,23 +40,14 @@ Hemellichamen = {
 
 pos_Hemellichamen_t = {
     "Zon" : { 0: {"x" : 0, "y" : 0}},
-
     "Aarde" : {0: {"x" : 0, "y" : 0}},
-
     "Mars" : {0: {"x" : 0, "y" : 0}},
-
     "Jupiter" : {0: {"x" : 0, "y" : 0}},
-
     "Saturnus" : {0: {"x" : 0, "y" : 0}},
-
     "Uranus" : {0: {"x" : 0, "y" : 0}},
-
     "Neptunus" : {0: {"x" : 0, "y" : 0}},
-
     "Titan" : {0: {"x" : 0, "y" : 0}},
-
     "Maan" : {0: {"x" : 0, "y" : 0}},
-
     "Titanfall" : {0: {"x" : 0, "y" : 0}}
 }
 
@@ -145,7 +136,7 @@ def Fres(t):
     global x_titanfall, y_titanfall, Fres_x, Fres_y, pos_Hemellichamen_t
     Fres_x = 0
     Fres_y = 0
-    kracht = 1000 # Newton
+    kracht = 31161 # Newton
     richting = 90 # graden
 
 
@@ -155,12 +146,18 @@ def Fres(t):
         MPlaneet = data["Massa"]
         R = np.sqrt((x_planeet - x_titanfall)**2 + (y_planeet - y_titanfall)**2)
         alfa = Hoekalfa(x_planeet, y_planeet, x_titanfall, y_titanfall)
+
         Fg_x, Fg_y = Newton(MPlaneet, R, alfa)
-        
+        if planet == "Aarde":
+            print('x:', x_planeet,"titanfallx:", x_titanfall)
+            print("min dat:", x_planeet - x_titanfall)
+            print("MPlaneet =", MPlaneet, "R =", R, "alfa =", alfa, "Fg_x =", Fg_x, "Fg_y =", Fg_y)
         Fres_x += Fg_x
         Fres_y += Fg_y
+    
     if t == 0:
         F_xMotor, F_yMotor = F_Motor(kracht, richting)           # TODO mechanisme om input toe te voegen/burns uit te voeren
+        print("motor aan")
         Fres_x += F_xMotor
         Fres_y += F_yMotor
 
@@ -188,10 +185,10 @@ def bewegingTitanfall(t):
     # Totaal_opgebrande_brandstof += Opgebrande_brandstof
     # MTitanfall -= Opgebrande_brandstof
 
-    print("Net forces (Fres_x, Fres_Y): ", Fres_x, Fres_y)
-    print("Acceleration (a_x, a_y):", a_x, a_y)
-    print("Velocity components (v_x, v_y):", v_x, v_y)
-    print("Spacecraft position (x_titanfall, y_titanfall):", x_titanfall, y_titanfall)
+    # print("Net forces (Fres_x, Fres_Y): ", Fres_x, Fres_y)
+    # print("Acceleration (a_x, a_y):", a_x, a_y)
+    # print("Velocity components (v_x, v_y):", v_x, v_y)
+    # print("Spacecraft position (x_titanfall, y_titanfall):", x_titanfall, y_titanfall)
     pos_Hemellichamen_t["Titanfall"][round(t, 4)] = {"x": x_titanfall, "y": y_titanfall}
 
 def bereken_delta_v(a_x, a_y):
@@ -225,6 +222,7 @@ scat = ax.scatter([], [], s=10)
 
 def calculate_Values():
     global t
+    t = 0
     while t <= t_max:
         progress = t / t_max * 100
         print(f"{t}/{t_max}\t\t\t\t{progress:.2f}%")
