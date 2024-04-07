@@ -5,12 +5,14 @@ from matplotlib.cm import get_cmap
 
 # Constants
 Pi = np.pi
-G = 6.67384e-11  # Gravitational constant
+G = 6.67384e-12  # Gravitational constant
 MTitanfall = 3000  # Mass of the spacecraft in kg
 Limit = 8e12  # Graph limit in meters
 Tijdstapfactor = 1  # Time step factor
 delta_t = 86400 * Tijdstapfactor  # Tijdstappen in dagen
 Totaal_opgebrande_brandstof = 0
+
+t = 0 # tijd in dagen
 
 # Button to start simulation
 control_panel_ax = plt.axes([0.7, 0.05, 0.1, 0.05])  # [left, bottom, width, height]
@@ -46,6 +48,48 @@ Hemellichamen = {
     "Neptunus": {"Massa": 1.0243e26, "Baanstraal": 4.498e12, "Omlooptijd": 164.8 * Dagen_in_een_jaar*Seconden_in_een_dag/Tijdstapfactor, "Starthoek": 341 * radiaal_per_graad, "x": 0, "y": 0},
     "Titan": {"Massa": 1.345e23, "Baanstraal": 1.221931e9, "Omlooptijd": 15.94513889*Seconden_in_een_dag/Tijdstapfactor, "Starthoek": 0, "x": 0, "y": 0},
     "Maan": {"Massa": 0.0735e24, "Baanstraal": 384.4e6, "Omlooptijd": 27.32*Seconden_in_een_dag/Tijdstapfactor, "Starthoek": 25 * radiaal_per_graad, "x": 0, "y": 0},
+}
+
+pos_Hemellichamen_t = {
+    "Zon" : {
+        0: {"x" : 0, "y" : 0},
+    },
+
+    "Aarde" : {
+        0: {"x" : 0, "y" : 0},
+    },
+
+    "Mars": {
+        0: {"x" : 0, "y" : 0},
+    },
+
+    "Jupiter" : {
+        0: {"x" : 0, "y" : 0},
+    },
+
+    "Saturnus" : {
+        0: {"x" : 0, "y" : 0},
+    },
+
+    "Uranus" : {
+        0: {"x" : 0, "y" : 0},
+    },
+
+    "Neptunus" : {
+        0: {"x" : 0, "y" : 0},
+    },
+
+    "Titan" : {
+        0: {"x" : 0, "y" : 0},
+    },
+
+    "Maan" : {
+        0: {"x" : 0, "y" : 0},
+    },
+
+    "Titanfall" : {
+        0: {"x" : 0, "y" : 0},
+    }
 }
 
 # Define a colormap and get colors for each planet
@@ -84,9 +128,9 @@ x_titanfall = x_LEO
 y_titanfall = y_LEO
 
 # Function to calculate planetary positions
-
 def Planetenposities(t):
-    planeten_locaties = {}
+    global pos_Hemellichamen_t
+
     for planeet, gegevens in Hemellichamen.items():
         baanstraal = gegevens["Baanstraal"]
         omlooptijd = gegevens["Omlooptijd"]
@@ -107,8 +151,7 @@ def Planetenposities(t):
             y += y_e
         else:
             x, y = cirkelbeweging(baanstraal, omlooptijd, starthoek, t)
-        planeten_locaties[planeet] = {"x": x, "y": y}
-    return planeten_locaties
+        pos_Hemellichamen_t[planeet][t] = {"x": x, "y": y}
 
 # Function to calculate the angle between a planet and Titanfall
 def Hoekalfa(x_planeet, y_planeet, x_titanfall, y_titanfall):
@@ -143,9 +186,10 @@ def Fres():
         
         Fres_x += Fg_x
         Fres_y += Fg_y
-    F_xMotor, F_yMotor = F_Motor(200,120)           # TODO mechanisme om input toe te voegen/burns uit te voeren
-    Fres_x += F_xMotor
-    Fres_y += F_yMotor
+
+    # F_xMotor, F_yMotor = F_Motor(200,120)           # TODO mechanisme om input toe te voegen/burns uit te voeren
+    # Fres_x += F_xMotor
+    # Fres_y += F_yMotor
 
 # Function to update spacecraft position
 # Het berekenen van de oorspronkelijke snelheden van Titanfall middels het differntieren van cirkelbeweging
@@ -184,6 +228,7 @@ def bewegingTitanfall(t):
         print("Acceleration (a_x, a_y):", a_x, a_y)
         print("Velocity components (v_x, v_y):", v_x, v_y)
         print("Spacecraft position (x_titanfall, y_titanfall):", x_titanfall, y_titanfall)
+    pos_Hemellichamen_t["Titanfall"][t] = {"x": x_titanfall, "y": y_titanfall}
 
 def bereken_delta_v(a_x, a_y):
     return np.sqrt((a_x*delta_t)**2 + (a_y*delta_t)**2)     #index 0 is v_x, index 1 is v_y
@@ -214,6 +259,18 @@ scatters = [ax.scatter([], [], s=50, color=color) for color in colors]
 # Initialize the spacecraft plot
 scat = ax.scatter([], [], s=10)
 
+def calculate_Values():
+    global t
+    while t < 5000:    
+        # Calculate force and update spacecraft's position
+        Planetenposities(t)
+        Fres()
+        bewegingTitanfall(t)
+        t += 1
+    print(pos_Hemellichamen_t)
+
+calculate_Values()
+
 # Function to initialize the animation
 def init():
     for i, (planet, color) in enumerate(zip(Hemellichamen.keys(), colors)):
@@ -227,19 +284,20 @@ def init():
 
 # Function to update the animation
 def update(frame):
-    global t, x_titanfall, y_titanfall
-    t = frame
-    planeten_posities = Planetenposities(t)
+    global pos_Hemellichamen_t, Tijdstapfactor
+
+    t_current = frame * Tijdstapfactor
+
     for i, (planet, color) in enumerate(zip(Hemellichamen.keys(), colors)):
-        x_current = planeten_posities[planet]["x"]
-        y_current = planeten_posities[planet]["y"]
+        x_current = pos_Hemellichamen_t[planet][t_current]["x"]
+        y_current = pos_Hemellichamen_t[planet][t_current]["y"]
         scatters[i].set_offsets([[x_current, y_current]])
     
-    # Calculate force and update spacecraft's position
-    Fres()
-    bewegingTitanfall(t)
+    x_current = pos_Hemellichamen_t["Titanfall"][t_current]["x"] 
+    y_current = pos_Hemellichamen_t["Titanfall"][t_current]["y"]
+
     # Update spacecraft's position on the plot
-    scat.set_offsets([[x_titanfall, y_titanfall]])
+    scat.set_offsets(x_current, y_current)
     scatters.append(scat)
     return scatters
 

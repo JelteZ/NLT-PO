@@ -11,7 +11,7 @@ G = 6.67384*10**-11 # Gravitatieconstante
 t = 0
 MTitanfall = 750    # Massa van onze Titanfall in kg
 
-Limit = 4e12        # Hulpvariabele om de grafiek makkelijker te schalen; e11 is voor aarde/mars, e12 is voor het volledige stelsel (in meters)
+Limit = 4e11        # Hulpvariabele om de grafiek makkelijker te schalen; e11 is voor aarde/mars, e12 is voor het volledige stelsel (in meters)
 Tijdstapfactor = 2  # bij Tijdstapfactor = 1 geeft de animatie 1 dag/frame
 a_x = 0
 a_y = 0
