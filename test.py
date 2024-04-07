@@ -15,7 +15,7 @@ Seconden_in_een_dag = 24*3600
 radiaal_per_graad = 2 * Pi / 360
 
 # Simulation parameters
-Limit = 8e12  # Graph limit in meters
+Limit = 6e12  # Graph limit in meters
 Tijdstapfactor = Seconden_in_een_dag/100  # Time step factor
 delta_t = 1000  # Tijdstap in seconden
 Totaal_opgebrande_brandstof = 0
@@ -77,7 +77,7 @@ def cirkelbeweging(R, T, Phi, t):
 Straal_Aarde = 6.371e6      # Meters
 altitude_LEO = 200e3 + Straal_Aarde
 T_LEO = 2*Pi*(altitude_LEO**1.5)/(G*Hemellichamen["Aarde"]["Massa"])**0.5       #Gravitatiekracht = Fmpz, met v = 2piR/T
-print("T_LE0 =", T_LEO)
+# print("T_LE0 =", T_LEO)
 x_LEO, y_LEO = cirkelbeweging(Hemellichamen["Aarde"]["Baanstraal"] + altitude_LEO, 
                               Hemellichamen["Aarde"]["Omlooptijd"], 
                               Hemellichamen["Aarde"]["Starthoek"], 
@@ -148,16 +148,16 @@ def Fres(t):
         alfa = Hoekalfa(x_planeet, y_planeet, x_titanfall, y_titanfall)
 
         Fg_x, Fg_y = Newton(MPlaneet, R, alfa)
-        if planet == "Aarde":
-            print('x:', x_planeet,"titanfallx:", x_titanfall)
-            print("min dat:", x_planeet - x_titanfall)
-            print("MPlaneet =", MPlaneet, "R =", R, "alfa =", alfa, "Fg_x =", Fg_x, "Fg_y =", Fg_y)
+        # if planet == "Aarde":
+            # print('x:', x_planeet,"titanfallx:", x_titanfall)
+            # print("min dat:", x_planeet - x_titanfall)
+            # print("MPlaneet =", MPlaneet, "R =", R, "alfa =", alfa, "Fg_x =", Fg_x, "Fg_y =", Fg_y)
         Fres_x += Fg_x
         Fres_y += Fg_y
     
     if t == 0:
         F_xMotor, F_yMotor = F_Motor(kracht, richting)           # TODO mechanisme om input toe te voegen/burns uit te voeren
-        print("motor aan")
+        # print("motor aan")
         Fres_x += F_xMotor
         Fres_y += F_yMotor
 
@@ -165,7 +165,7 @@ def Fres(t):
 # Doordat de assen gezet zijn zodat titanfall alleen in de y richting beweegt is de x snelheid 0 en is dus alle snelheid y snelheid
 v_x = 0
 v_y = ((2 * Pi * altitude_LEO) / T_LEO) + ((2 * Pi * Hemellichamen["Aarde"]["Baanstraal"])/Hemellichamen["Aarde"]["Omlooptijd"]) # Angular velocity in LEO
-print("v_y_begin =", v_y)
+# print("v_y_begin =", v_y)
 
 def bewegingTitanfall(t):
     global x_titanfall, y_titanfall, v_x, v_y, MTitanfall, F_xMotor, F_yMotor, Totaal_opgebrande_brandstof
@@ -225,7 +225,7 @@ def calculate_Values():
     t = 0
     while t <= t_max:
         progress = t / t_max * 100
-        print(f"{t}/{t_max}\t\t\t\t{progress:.2f}%")
+        # print(f"{t}/{t_max}\t\t\t\t{progress:.2f}%")
 
         # Calculate force and update spacecraft's position
         Planetenposities(t) 

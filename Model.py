@@ -2,171 +2,95 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from matplotlib.cm import get_cmap
-from matplotlib.collections import LineCollection
 
-# @@ atm gaat er wat mis met de berekening van Fres_x en Fres_y. Deze waarden zijn te klein voor de werkelijkheid.
-
+# Constants
 Pi = np.pi
-G = 6.67384*10**-11 # Gravitatieconstante
-t = 0
-MTitanfall = 750    # Massa van onze Titanfall in kg
+G = 6.67384e-12  # Gravitational constant
+MTitanfall = 3000  # Mass of the spacecraft in kg
 
-Limit = 4e11        # Hulpvariabele om de grafiek makkelijker te schalen; e11 is voor aarde/mars, e12 is voor het volledige stelsel (in meters)
-Tijdstapfactor = 2  # bij Tijdstapfactor = 1 geeft de animatie 1 dag/frame
-a_x = 0
-a_y = 0
-v_x = 0
-v_y = 0
-Fres_x = 0
-Fres_y = 0
-delta_t = 86400 * Tijdstapfactor # Tijdstap in seconden
 
-# Knop om te beginnen
-control_panel_ax = plt.axes([0.7, 0.05, 0.1, 0.05])  # [left, bottom, width, height]
-start_button = plt.Button(control_panel_ax, 'Start')
-Start = False 
-
+# Number of days in a year and conversion factor for radians
 Dagen_in_een_jaar = 365
-radiaal_per_graad = 2*Pi/360
+Seconden_in_een_dag = 24*3600
+radiaal_per_graad = 2 * Pi / 360
 
-def on_start_button_clicked(event):
-    global Start, start_text
-    if Start == False:
-        Start = True
+# Simulation parameters
+Limit = 6e12  # Graph limit in meters
+Tijdstapfactor = Seconden_in_een_dag/100  # Time step factor
+delta_t = 1000  # Tijdstap in seconden
+Totaal_opgebrande_brandstof = 0
 
-        # afstand aarde-Titanfall totdat er een motor gaat bewegen
-        distance_to_earth = np.sqrt((x_titanfall - Hemellichamen["Aarde"]["x"])**2 + (y_titanfall - Hemellichamen["Aarde"]["y"])**2)
-        
-        # Orbitaalsnelheid 
-        v_orbit_earth = np.sqrt(G * Hemellichamen["Aarde"]["Massa"] / distance_to_earth)
-        
-        # Set the initial velocity of the spacecraft to be tangential to its orbit around Earth
-        v_x = -v_orbit_earth * np.sin(Hoekalfa(Hemellichamen["Aarde"]["x"], Hemellichamen["Aarde"]["y"], x_titanfall, y_titanfall))
-        v_y = v_orbit_earth * np.cos(Hoekalfa(Hemellichamen["Aarde"]["x"], Hemellichamen["Aarde"]["y"], x_titanfall, y_titanfall))
+t = 0 # tijd in seconden
+t_max = 7 * Dagen_in_een_jaar * Seconden_in_een_dag # max tijd in seconden
 
-        # Set the initial position of the spacecraft
-        initial_position = (x_titanfall, y_titanfall)
+Start = False
 
-    elif Start == True:
-        Start = False
-
-    print('We gaan beginnen! Riemen vast!')
-
-start_button.on_clicked(on_start_button_clicked)
-
-
-# Bibliotheek met al onze startwaarden/constanten
+# Planetary data
 Hemellichamen = {
-    "Zon": {
-        "Massa": 1.9884 * 10**30,  # kg
-        "Baanstraal": 0,  # Nvt voor de zon
-        "Omlooptijd": 0,  # Nvt voor de zon 
-        "Starthoek": 0,  # Nvt voor de zon
-        "x": 0,
-        "y": 0,
-    },
-    "Aarde": {
-        "Massa": 5.972 * 10**24,  # kg
-        "Baanstraal": 1.496 * 10**11,  # m
-        "Omlooptijd": 365.256/Tijdstapfactor,  # dag
-        "Starthoek": 25 * radiaal_per_graad,  # degrees
-        "x": 0,
-        "y": 0,
-    },
-    "Mars": {
-        "Massa": 6.4171 * 10**23,  # kg
-        "Baanstraal": 2.279 * 10**11,  # m
-        "Omlooptijd": 687/Tijdstapfactor,  # dag
-        "Starthoek": 329 * radiaal_per_graad,  # degrees
-        "x": 0,
-        "y": 0,
-    },
-    "Jupiter": {
-        "Massa": 1.8982 * 10**27,  # kg
-        "Baanstraal": 7.785 * 10**11,  # m
-        "Omlooptijd": 11.86 *Dagen_in_een_jaar/Tijdstapfactor,  # dag
-        "Starthoek": 185 * radiaal_per_graad,  # degrees
-        "x": 0,
-        "y": 0,
-    },
-    "Saturnus": {
-        "Massa": 5.6834 * 10**26,  # kg
-        "Baanstraal": 1.427 * 10**12,  # m
-        "Omlooptijd": 29.45 * Dagen_in_een_jaar/Tijdstapfactor,  # dag
-        "Starthoek": 257 * radiaal_per_graad,  # degrees
-        "x": 0,
-        "y": 0,
-    },
-    "Uranus": {
-        "Massa": 86.8 * 10**24,  # kg
-        "Baanstraal": 2.871 * 10**12,  # m
-        "Omlooptijd": 84.01 * Dagen_in_een_jaar/Tijdstapfactor,  # dag
-        "Starthoek": 244 * radiaal_per_graad,  # degrees
-        "x": 0,
-        "y": 0,
-    },
-    "Neptunus": {
-        "Massa": 1.0243 * 10**26,  # kg
-        "Baanstraal": 4.498 * 10**12,  # m
-        "Omlooptijd": 164.8 * Dagen_in_een_jaar/Tijdstapfactor,  # dag
-        "Starthoek": 341 * radiaal_per_graad,  # degrees
-        "x": 0,
-        "y": 0,
-    },
-    "Titan": {
-        "Massa": 1.345 * 10**23,  # kg
-        "Baanstraal": 1.221931 * 10**9,  # m (om Saturnus)
-        "Omlooptijd": 15.94513889/Tijdstapfactor,  # dag (om Saturnus)
-        "Starthoek": 0,  # degrees (om Saturnus)
-        "x": 0,
-        "y": 0,
-    },
-    "Maan": {
-        "Massa": 0.0735 * 10**24,  # kg
-        "Baanstraal": 384.4 * 10**6,  # m (om Aarde)
-        "Omlooptijd": 27.32/Tijdstapfactor,  # dag(om Aarde)
-        "Starthoek": 25 * radiaal_per_graad,  # degrees (om Aarde)
-        "x": 0,
-        "y": 0,
-    },
+    "Zon": {"Massa": 1.9884e30, "Baanstraal": 0, "Omlooptijd": 0, "Starthoek": 0},
+    "Aarde": {"Massa": 5.972e24, "Baanstraal": 1.496e11, "Omlooptijd": 365.256 * Seconden_in_een_dag, "Starthoek": 0 * radiaal_per_graad},
+    "Mars": {"Massa": 6.4171e23, "Baanstraal": 2.279e11, "Omlooptijd": 687 * Seconden_in_een_dag, "Starthoek": 304 * radiaal_per_graad},
+    "Jupiter": {"Massa": 1.8982e27, "Baanstraal": 7.785e11, "Omlooptijd": 11.86 * Dagen_in_een_jaar * Seconden_in_een_dag, "Starthoek": 160 * radiaal_per_graad},
+    "Saturnus": {"Massa": 5.6834e26, "Baanstraal": 1.427e12, "Omlooptijd": 29.45 * Dagen_in_een_jaar * Seconden_in_een_dag, "Starthoek": (360-105.1) * radiaal_per_graad},
+    "Uranus": {"Massa": 86.8e24, "Baanstraal": 2.871e12, "Omlooptijd": 84.01 * Dagen_in_een_jaar * Seconden_in_een_dag, "Starthoek": 219 * radiaal_per_graad,},
+    "Neptunus": {"Massa": 1.0243e26, "Baanstraal": 4.498e12, "Omlooptijd": 164.8 * Dagen_in_een_jaar * Seconden_in_een_dag, "Starthoek": 316 * radiaal_per_graad},
+    "Titan": {"Massa": 1.345e23, "Baanstraal": 1.221931e9, "Omlooptijd": 15.94513889 * Seconden_in_een_dag, "Starthoek": 335,},
+    "Maan": {"Massa": 0.0735e24, "Baanstraal": 384.4e6, "Omlooptijd": 27.32 * Seconden_in_een_dag, "Starthoek": 0 * radiaal_per_graad},
+}
+
+pos_Hemellichamen_t = {
+    "Zon" : { 0: {"x" : 0, "y" : 0}},
+    "Aarde" : {0: {"x" : 0, "y" : 0}},
+    "Mars" : {0: {"x" : 0, "y" : 0}},
+    "Jupiter" : {0: {"x" : 0, "y" : 0}},
+    "Saturnus" : {0: {"x" : 0, "y" : 0}},
+    "Uranus" : {0: {"x" : 0, "y" : 0}},
+    "Neptunus" : {0: {"x" : 0, "y" : 0}},
+    "Titan" : {0: {"x" : 0, "y" : 0}},
+    "Maan" : {0: {"x" : 0, "y" : 0}},
+    "Titanfall" : {0: {"x" : 0, "y" : 0}}
 }
 
 # Define a colormap and get colors for each planet
 cmap = get_cmap('tab10')
 colors = [cmap(i) for i in range(len(Hemellichamen)+1)]
-LEO = 2000e3           #2000km
-T_LEO = 2*Pi*(LEO**1.5)/(G*Hemellichamen["Aarde"]["Massa"])**0.5              #Gravitatiekracht = Fmpz, met v = 2piR/T
 
-
-def Hoeksnelheid(R, T):
-    if T == 0: #delen door 0 beveiliging
+# Function to calculate angular velocity
+def Hoeksnelheid(T):
+    if T == 0: # delen door nul is flauwekul save
         return None
     else:
-        V = (2 * Pi) / T
+        V = (2 * Pi) / T        # Met T in seconden, dus V in radialen/seconde
         return V
 
-
+# Function for circular motion
 def cirkelbeweging(R, T, Phi, t):
-    V = Hoeksnelheid(R, T)
+    V = Hoeksnelheid(T)
     if R is not None and V is not None:
         x = R * np.cos(V * t + Phi)
         y = R * np.sin(V * t + Phi)
         return x, y
     else:
-        return 0, 0 # Valbeveiliging voor de Zon
-Straal_Aarde = 6.371e6      #Meters
+        return 0, 0  # valbeveiliging zon
+
+# Set the initial position of Titanfall
+Straal_Aarde = 6.371e6      # Meters
 altitude_LEO = 200e3 + Straal_Aarde
+T_LEO = 2*Pi*(altitude_LEO**1.5)/(G*Hemellichamen["Aarde"]["Massa"])**0.5       #Gravitatiekracht = Fmpz, met v = 2piR/T
+# print("T_LE0 =", T_LEO)
 x_LEO, y_LEO = cirkelbeweging(Hemellichamen["Aarde"]["Baanstraal"] + altitude_LEO, 
                               Hemellichamen["Aarde"]["Omlooptijd"], 
                               Hemellichamen["Aarde"]["Starthoek"], 
-                              t)
+                              0)  # Initial time is 0
 
-# Set the initial position of Titanfall
+# Initial position of Titanfall
 x_titanfall = x_LEO
 y_titanfall = y_LEO
 
+# Function to calculate planetary positions
 def Planetenposities(t):
-    planeten_locaties = {}
+    global pos_Hemellichamen_t
+
     for planeet, gegevens in Hemellichamen.items():
         baanstraal = gegevens["Baanstraal"]
         omlooptijd = gegevens["Omlooptijd"]
@@ -187,103 +111,167 @@ def Planetenposities(t):
             y += y_e
         else:
             x, y = cirkelbeweging(baanstraal, omlooptijd, starthoek, t)
-        planeten_locaties[planeet] = {"x": x, "y": y}
-    return planeten_locaties
+        pos_Hemellichamen_t[planeet][round(t, 4)] = {"x": x, "y": y}
 
+
+# Function to calculate the angle between a planet and Titanfall
 def Hoekalfa(x_planeet, y_planeet, x_titanfall, y_titanfall):
-    alfa = np.arctan((y_planeet-y_titanfall)/(x_planeet-x_titanfall))
+    alfa = np.arctan2(y_planeet - y_titanfall, x_planeet - x_titanfall)
     return alfa
 
-# De functie voor de zwaartekracht van de planeet
+# Function to calculate gravitational force
 def Newton(MPlaneet, R, alfa):
-    Fg_x = -np.cos(alfa)*(G*MTitanfall*MPlaneet)/R**2 # Hierin is alfa de hoek tussen de lijn Titanfall - planeet en de x-as
-    Fg_y = -np.sin(alfa)*(G*MTitanfall*MPlaneet)/R**2
-
+    Fg_x = -np.cos(alfa) * (G * MTitanfall * MPlaneet) / R**2
+    Fg_y = -np.sin(alfa) * (G * MTitanfall * MPlaneet) / R**2
     return Fg_x, Fg_y
 
-# hoofdfunctie voor de resulterende kracht
-def Fres():
-    global Fres_x, Fres_y, x_titanfall, y_titanfall
+# Function to calculate resulting force
+def F_Motor(Magnitude, richting):
+    richting = richting * radiaal_per_graad     #conversie naar radialen
+    F_xMotor = Magnitude*np.cos(richting)
+    F_yMotor = Magnitude*np.sin(richting)
+    return F_xMotor, F_yMotor
+
+def Fres(t):
+    global x_titanfall, y_titanfall, Fres_x, Fres_y, pos_Hemellichamen_t
     Fres_x = 0
     Fres_y = 0
+    kracht = 31161 # Newton
+    richting = 90 # graden
+
 
     for planet, data in Hemellichamen.items():
-        x_planeet = data["x"]
-        y_planeet = data["y"]
+        x_planeet = pos_Hemellichamen_t[planet][round(t,4)]["x"]
+        y_planeet = pos_Hemellichamen_t[planet][round(t,4)]["y"]
         MPlaneet = data["Massa"]
         R = np.sqrt((x_planeet - x_titanfall)**2 + (y_planeet - y_titanfall)**2)
         alfa = Hoekalfa(x_planeet, y_planeet, x_titanfall, y_titanfall)
+
         Fg_x, Fg_y = Newton(MPlaneet, R, alfa)
-        
+        # if planet == "Aarde":
+            # print('x:', x_planeet,"titanfallx:", x_titanfall)
+            # print("min dat:", x_planeet - x_titanfall)
+            # print("MPlaneet =", MPlaneet, "R =", R, "alfa =", alfa, "Fg_x =", Fg_x, "Fg_y =", Fg_y)
         Fres_x += Fg_x
         Fres_y += Fg_y
+    
+    if t == 0:
+        F_xMotor, F_yMotor = F_Motor(kracht, richting)           # TODO mechanisme om input toe te voegen/burns uit te voeren
+        # print("motor aan")
+        Fres_x += F_xMotor
+        Fres_y += F_yMotor
+
+# Initial velocity of Titanfall
+# Doordat de assen gezet zijn zodat titanfall alleen in de y richting beweegt is de x snelheid 0 en is dus alle snelheid y snelheid
+v_x = 0
+v_y = ((2 * Pi * altitude_LEO) / T_LEO) + ((2 * Pi * Hemellichamen["Aarde"]["Baanstraal"])/Hemellichamen["Aarde"]["Omlooptijd"]) # Angular velocity in LEO
+# print("v_y_begin =", v_y)
 
 def bewegingTitanfall(t):
-    global a_x, a_y, v_x, v_y, x_titanfall, y_titanfall, Fres_x, Fres_y
+    global x_titanfall, y_titanfall, v_x, v_y, MTitanfall, F_xMotor, F_yMotor, Totaal_opgebrande_brandstof
+    # Calculate acceleration, velocity, and position of the spacecraft
+    a_x = Fres_x / MTitanfall 
+    a_y = Fres_y / MTitanfall
+    # a_x_Motor = F_xMotor / MTitanfall
+    # a_y_Motor = F_yMotor / MTitanfall
+    v_x = v_x + a_x * delta_t
+    v_y = v_y + a_y * delta_t
 
-    if Start != True:
-        x_e, y_e = cirkelbeweging(Hemellichamen["Aarde"]["Baanstraal"], Hemellichamen["Aarde"]["Omlooptijd"],
-                                       Hemellichamen["Aarde"]["Starthoek"], t)
-        x_titanfall, y_titanfall = cirkelbeweging(LEO, T_LEO, 0,t)
-        x_titanfall, y_titanfall =+ x_e, y_e
-    else:
-        a_x = Fres_x/MTitanfall 
-        a_y = Fres_y/MTitanfall
-        v_x = v_x + a_x*delta_t
-        v_y = v_y + a_y*delta_t
-        x_titanfall = x_titanfall+ v_x*delta_t
-        y_titanfall = y_titanfall + v_y*delta_t
-        print('---------------------------------------------------------------------------------------------')
-        print('x_titanfall:', x_titanfall, 'y_titanfall:', y_titanfall)
-        print('v_x:', v_x, 'v_y:', v_y)
-        print('a_x:', a_x, 'a_y:', a_y)
-        print('fg_x:', Fres_x, 'fg_y:', Fres_y)
+    x_titanfall = x_titanfall + v_x * delta_t
+    y_titanfall = y_titanfall + v_y * delta_t
+    
 
+    # Opgebrande_brandstof = Brandstof(a_x_Motor, a_y_Motor)
+    # Totaal_opgebrande_brandstof += Opgebrande_brandstof
+    # MTitanfall -= Opgebrande_brandstof
+
+    # print("Net forces (Fres_x, Fres_Y): ", Fres_x, Fres_y)
+    # print("Acceleration (a_x, a_y):", a_x, a_y)
+    # print("Velocity components (v_x, v_y):", v_x, v_y)
+    # print("Spacecraft position (x_titanfall, y_titanfall):", x_titanfall, y_titanfall)
+    pos_Hemellichamen_t["Titanfall"][round(t, 4)] = {"x": x_titanfall, "y": y_titanfall}
+
+def bereken_delta_v(a_x, a_y):
+    return np.sqrt((a_x*delta_t)**2 + (a_y*delta_t)**2)     #index 0 is v_x, index 1 is v_y
+
+def bereken_arbeid(delta_v, massa):
+    return 0.5 * massa * (delta_v)**2       # W = F*x = ∫Fdx = ∫madx = ∫m dv/dt dx = m∫vdv = 0.5mv² = Ek
+
+def Brandstof(a_x_Motor, a_y_Motor):
+    Methane_density = 0.72      #kg/m³
+    Methaan_stookwaarde = 35.8e6    #J/m³
+    Methaan_stookwaarde_per_kg = Methaan_stookwaarde/Methane_density    #J/kg
+
+    delta_v = bereken_delta_v(a_x_Motor, a_y_Motor)
+    arbeid = bereken_arbeid(delta_v, MTitanfall)
+    Massa_brandstof = arbeid/Methaan_stookwaarde_per_kg         #J/J/kg = kg methaan
+
+    return Massa_brandstof
+
+
+# Initialize the plot
 fig, ax = plt.subplots()
 ax.set_xlim(-Limit, Limit)
 ax.set_ylim(-Limit, Limit)
-scat = ax.scatter([], [], s=10)
-all_positions = []
 
+# Initialize scatter plots for each planet
+scatters = [ax.scatter([], [], s=50, color=color) for color in colors]
+
+# Initialize the spacecraft plot
+scat = ax.scatter([], [], s=10)
+
+def calculate_Values():
+    global t
+    t = 0
+    while t <= t_max:
+        progress = t / t_max * 100
+        # print(f"{t}/{t_max}\t\t\t\t{progress:.2f}%")
+
+        # Calculate force and update spacecraft's position
+        Planetenposities(t) 
+        Fres(t)
+        bewegingTitanfall(t)
+        t += delta_t
+
+
+calculate_Values()
+
+# Function to initialize the animation
 def init():
     for i, (planet, color) in enumerate(zip(Hemellichamen.keys(), colors)):
         ax.scatter([], [], s=10, color=color, label=planet)
-        all_positions.append([])  # Initialize all_positions list for each planet
         # Add circles representing orbits with respective planet color
         orbit_radius = Hemellichamen[planet]["Baanstraal"]
-        if planet not in ["Titan", "Maan"]:  # Exclude Titan and the Moon
+        if planet not in ["Titan", "Maan"]:
             orbit_circle = plt.Circle((0, 0), orbit_radius, color=color, fill=False)
             ax.add_artist(orbit_circle)
     return scat,
 
-
+# Function to update the animation
 def update(frame):
-    global t, x_titanfall, y_titanfall  # Declare global variables
-    global a_x, a_y, v_x, v_y, Fres_x, Fres_y  # Declare global variables
+    global pos_Hemellichamen_t, Tijdstapfactor, delta_t
     
-    t = frame
-    planeten_posities = Planetenposities(t)
-    for i, (planet, color) in enumerate(zip(Hemellichamen.keys(), colors)):
-        # Voeg huidige positie als stip toe
-        x_current = planeten_posities[planet]["x"]
-        y_current = planeten_posities[planet]["y"]
-        scatters[i].set_offsets([[x_current, y_current]])
-    
-    # Calculate force and update Titanfall's position, velocity, and acceleration
-    Fres()
+    if round(frame * Tijdstapfactor * delta_t, 4) <= t_max:
+        t_current = round(frame * Tijdstapfactor * delta_t, 4) # dit wordt afgerond omdat we twee floats met elkaar vergelijken
 
-    bewegingTitanfall(t)
-    
-    # Update Titanfall's position on the plot
-    scat.set_offsets([[x_titanfall, y_titanfall]])
+    for i, (planet, color) in enumerate(zip(Hemellichamen.keys(), colors)):
+        x_current = pos_Hemellichamen_t[planet][t_current]["x"]
+        y_current = pos_Hemellichamen_t[planet][t_current]["y"]
+        # if planet == "Aarde":
+            # print ("Aarde staat op x =", x_current," en y =", y_current)
+
+        scatters[i].set_offsets([[x_current, y_current]])
+
+    x_current = pos_Hemellichamen_t["Titanfall"][t_current]["x"] 
+    y_current = pos_Hemellichamen_t["Titanfall"][t_current]["y"]
+
+    # Update spacecraft's position on the plot
+    scat.set_offsets([[x_current, y_current]])
     scatters.append(scat)
+
     return scatters
 
-
-# Create scatter plots for each planet
-scatters = [ax.scatter([], [], s=50, color=color) for color in colors]
-
-# Call FuncAnimation with the updated update() function
-ani = FuncAnimation(fig, update, frames=np.arange(0, 5000), init_func=init, blit=True)
+# Create the animation
+ani = FuncAnimation(fig, update, frames=np.arange(0, 1000000), init_func=init, blit=True)
 plt.legend(loc='upper left')
 plt.show()
