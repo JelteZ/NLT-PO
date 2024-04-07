@@ -10,6 +10,7 @@ MTitanfall = 3000  # Mass of the spacecraft in kg
 Limit = 8e12  # Graph limit in meters
 Tijdstapfactor = 1  # Time step factor
 delta_t = 86400 * Tijdstapfactor  # Tijdstappen in dagen
+Totaal_opgebrande_brandstof = 0
 
 # Button to start simulation
 control_panel_ax = plt.axes([0.7, 0.05, 0.1, 0.05])  # [left, bottom, width, height]
@@ -153,9 +154,8 @@ v_LEO = 2 * Pi / T_LEO  # Angular velocity in LEO
 v_x = -altitude_LEO * np.sin(Hemellichamen["Aarde"]["Starthoek"] + Pi/2) * v_LEO  # Tangential velocity component in x-direction
 v_y = altitude_LEO * np.cos(Hemellichamen["Aarde"]["Starthoek"] + Pi/2) * v_LEO  # Tangential velocity component in y-direction
 
-
 def bewegingTitanfall(t):
-    global x_titanfall, y_titanfall, v_x, v_y, MTitanfall, F_xMotor, F_yMotor
+    global x_titanfall, y_titanfall, v_x, v_y, MTitanfall, F_xMotor, F_yMotor, Totaal_opgebrande_brandstof
     if Start != True:
         # Spacecraft stays in its initial position
         x_e, y_e = cirkelbeweging(Hemellichamen["Aarde"]["Baanstraal"], Hemellichamen["Aarde"]["Omlooptijd"],
@@ -177,6 +177,7 @@ def bewegingTitanfall(t):
         y_titanfall = y_titanfall + v_y * delta_t
 
         Opgebrande_brandstof = Brandstof(a_x_Motor, a_y_Motor)
+        Totaal_opgebrande_brandstof += Opgebrande_brandstof
         MTitanfall -= Opgebrande_brandstof
 
         print("Net forces (Fres_x, Fres_Y): ", Fres_x, Fres_y)
