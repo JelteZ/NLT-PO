@@ -1,3 +1,4 @@
+# Python Interperter 3.12.2
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
