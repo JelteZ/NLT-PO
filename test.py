@@ -8,49 +8,35 @@ Pi = np.pi
 G = 6.67384e-12  # Gravitational constant
 MTitanfall = 3000  # Mass of the spacecraft in kg
 
-Limit = 8e12  # Graph limit in meters
-Tijdstapfactor = 10  # Time step factor
-delta_t = Pi  # Tijdstap in dagen
-Totaal_opgebrande_brandstof = 0
-
-t = 0 # tijd in dagen
-t_max = 5000 # max tijd in dagen
-highest_t = 0 # stopt de animatie op het hoogste tijdstip
-
-# Button to start simulation
-control_panel_ax = plt.axes([0.7, 0.05, 0.1, 0.05])  # [left, bottom, width, height]
-start_button = plt.Button(control_panel_ax, 'Start')
-Start = False
-
 
 # Number of days in a year and conversion factor for radians
 Dagen_in_een_jaar = 365
 Seconden_in_een_dag = 24*3600
 radiaal_per_graad = 2 * Pi / 360
 
-# Function to handle start button click event
-def on_start_button_clicked(event):
-    global Start
-    if Start == False:
-        Start = True
-        print('We gaan beginnen! Riemen vast!')
-    elif Start == True:
-        Start = False
-    print('Start =', Start)
+# Simulation parameters
+Limit = 8e12  # Graph limit in meters
+Tijdstapfactor = Seconden_in_een_dag  # Time step factor
+delta_t = 1000 * Pi  # Tijdstap in seconden
+Totaal_opgebrande_brandstof = 0
 
-start_button.on_clicked(on_start_button_clicked)
+t = 0 # tijd in seconden
+t_max = 7 * Dagen_in_een_jaar * Seconden_in_een_dag # max tijd in seconden
+highest_t = 0 # stopt de animatie op het hoogste tijdstip
+
+Start = False
 
 # Planetary data
 Hemellichamen = {
     "Zon": {"Massa": 1.9884e30, "Baanstraal": 0, "Omlooptijd": 0, "Starthoek": 0},
-    "Aarde": {"Massa": 5.972e24, "Baanstraal": 1.496e11, "Omlooptijd": 365.256, "Starthoek": 25 * radiaal_per_graad},
-    "Mars": {"Massa": 6.4171e23, "Baanstraal": 2.279e11, "Omlooptijd": 687, "Starthoek": 329 * radiaal_per_graad},
-    "Jupiter": {"Massa": 1.8982e27, "Baanstraal": 7.785e11, "Omlooptijd": 11.86 * Dagen_in_een_jaar, "Starthoek": 185 * radiaal_per_graad},
-    "Saturnus": {"Massa": 5.6834e26, "Baanstraal": 1.427e12, "Omlooptijd": 29.45 * Dagen_in_een_jaar, "Starthoek": 257 * radiaal_per_graad},
-    "Uranus": {"Massa": 86.8e24, "Baanstraal": 2.871e12, "Omlooptijd": 84.01 * Dagen_in_een_jaar, "Starthoek": 244 * radiaal_per_graad,},
-    "Neptunus": {"Massa": 1.0243e26, "Baanstraal": 4.498e12, "Omlooptijd": 164.8 * Dagen_in_een_jaar, "Starthoek": 341 * radiaal_per_graad},
-    "Titan": {"Massa": 1.345e23, "Baanstraal": 1.221931e9, "Omlooptijd": 15.94513889, "Starthoek": 0,},
-    "Maan": {"Massa": 0.0735e24, "Baanstraal": 384.4e6, "Omlooptijd": 27.32, "Starthoek": 25 * radiaal_per_graad},
+    "Aarde": {"Massa": 5.972e24, "Baanstraal": 1.496e11, "Omlooptijd": 365.256 * Seconden_in_een_dag, "Starthoek": 25 * radiaal_per_graad},
+    "Mars": {"Massa": 6.4171e23, "Baanstraal": 2.279e11, "Omlooptijd": 687 * Seconden_in_een_dag, "Starthoek": 329 * radiaal_per_graad},
+    "Jupiter": {"Massa": 1.8982e27, "Baanstraal": 7.785e11, "Omlooptijd": 11.86 * Dagen_in_een_jaar * Seconden_in_een_dag, "Starthoek": 185 * radiaal_per_graad},
+    "Saturnus": {"Massa": 5.6834e26, "Baanstraal": 1.427e12, "Omlooptijd": 29.45 * Dagen_in_een_jaar * Seconden_in_een_dag, "Starthoek": 130.1 * radiaal_per_graad},
+    "Uranus": {"Massa": 86.8e24, "Baanstraal": 2.871e12, "Omlooptijd": 84.01 * Dagen_in_een_jaar * Seconden_in_een_dag, "Starthoek": 244 * radiaal_per_graad,},
+    "Neptunus": {"Massa": 1.0243e26, "Baanstraal": 4.498e12, "Omlooptijd": 164.8 * Dagen_in_een_jaar * Seconden_in_een_dag, "Starthoek": 341 * radiaal_per_graad},
+    "Titan": {"Massa": 1.345e23, "Baanstraal": 1.221931e9, "Omlooptijd": 15.94513889 * Seconden_in_een_dag, "Starthoek": 0,},
+    "Maan": {"Massa": 0.0735e24, "Baanstraal": 384.4e6, "Omlooptijd": 27.32 * Seconden_in_een_dag, "Starthoek": 25 * radiaal_per_graad},
 }
 
 pos_Hemellichamen_t = {
@@ -162,28 +148,6 @@ def Hoekalfa(x_planeet, y_planeet, x_titanfall, y_titanfall):
     alfa = np.arctan2(y_planeet - y_titanfall, x_planeet - x_titanfall)
     return alfa
 
-def check_hoek_aarde_saturnus(t):
-    global pos_Hemellichamen_t, Hemellichamen
-    x_aarde = pos_Hemellichamen_t["Aarde"][t]["x"]
-    y_aarde = pos_Hemellichamen_t["Aarde"][t]["y"]
-    r_aarde = Hemellichamen["Aarde"]["Baanstraal"]
-    x_saturnus = pos_Hemellichamen_t["Saturnus"][t]["x"]
-    y_saturnus = pos_Hemellichamen_t["Saturnus"][t]["y"]
-    r_saturnus = Hemellichamen["Saturnus"]["Baanstraal"]
-    
-    gewenste_hoek = 105.9 * radiaal_per_graad
-    gewenste_afstand = round(np.sqrt(r_saturnus**2 + r_aarde**2 - 2*r_saturnus*r_aarde*np.cos(gewenste_hoek)), 3)
-    afstand = round(np.sqrt((x_saturnus - x_aarde)**2 + (y_saturnus - y_aarde)**2), 3)
-    # print(f"De afstand tussen Aarde en Saturnus is {afstand} en de gewenste afstand is {gewenste_afstand}")
-    if afstand == gewenste_afstand:
-        print("De hoek tussen Aarde en Saturnus is correct bij t =", t)
-
-
-
-
-
-
-
 # Function to calculate gravitational force
 def Newton(MPlaneet, R, alfa):
     Fg_x = -np.cos(alfa) * (G * MTitanfall * MPlaneet) / R**2
@@ -203,8 +167,8 @@ def Fres(t):
     Fres_y = 0
 
     for planet, data in Hemellichamen.items():
-        x_planeet = pos_Hemellichamen_t[planet][t]["x"]
-        y_planeet = pos_Hemellichamen_t[planet][t]["y"]
+        x_planeet = pos_Hemellichamen_t[planet][round(t,4)]["x"]
+        y_planeet = pos_Hemellichamen_t[planet][round(t,4)]["y"]
         MPlaneet = data["Massa"]
         R = np.sqrt((x_planeet - x_titanfall)**2 + (y_planeet - y_titanfall)**2)
         alfa = Hoekalfa(x_planeet, y_planeet, x_titanfall, y_titanfall)
@@ -287,17 +251,16 @@ scat = ax.scatter([], [], s=10)
 
 def calculate_Values():
     global t, highest_t
-    while t <= t_max:    
+    while t <= t_max:
+        progress = t / t_max * 100
+        print(f"{t}/{t_max}\t\t\t\t{progress:.2f}%")
+
         # Calculate force and update spacecraft's position
-        Planetenposities(round(t, 4))
-        Fres(round(t, 4))
-        bewegingTitanfall(round(t, 4))
-        check_hoek_aarde_saturnus(round(t, 4))
+        Planetenposities(t) 
+        Fres(t)
+        bewegingTitanfall(t)
         t += delta_t
-    highest_t = t
-    # for tijd in pos_Hemellichamen_t["Saturnus"]:
-    #     print(f"op t = {tijd} is de x van Saturnus {pos_Hemellichamen_t['Saturnus'][tijd]['x']}")
-    #     print(f"op t = {tijd} is de y van Saturnus {pos_Hemellichamen_t['Saturnus'][tijd]['y']}")    
+    highest_t = t # hoogste veelvoud van pi voordat het boven t_max uitkomt
 
 calculate_Values()
 
@@ -315,12 +278,15 @@ def init():
 # Function to update the animation
 def update(frame):
     global pos_Hemellichamen_t, Tijdstapfactor, delta_t
+    freem = 0
+    t_current = round(freem * Tijdstapfactor * delta_t, 4) # dit wordt afgerond omdat we twee floats met elkaar vergelijken
+    
+    print(f"t = {t_current}")
+    print(f"frame = {freem}")
+    print(f"Tijdstapfactor = {Tijdstapfactor}")
+    print(f"delta_t = {delta_t}")
 
-    t_current = round(frame * Tijdstapfactor * delta_t, 4) # dit wordt afgerond omdat we twee floats met elkaar vergelijken
-    
-    # print(f"t = {t_current}")
-    # print(f"pos aarde: {pos_Hemellichamen_t["Aarde"][t_current]}")
-    
+    print("g")
     for i, (planet, color) in enumerate(zip(Hemellichamen.keys(), colors)):
         x_current = pos_Hemellichamen_t[planet][t_current]["x"]
         y_current = pos_Hemellichamen_t[planet][t_current]["y"]
@@ -328,13 +294,14 @@ def update(frame):
             # print ("Aarde staat op x =", x_current," en y =", y_current)
 
         scatters[i].set_offsets([[x_current, y_current]])
-    
+    print("x")
     x_current = pos_Hemellichamen_t["Titanfall"][t_current]["x"] 
     y_current = pos_Hemellichamen_t["Titanfall"][t_current]["y"]
-
+    print("a")
     # Update spacecraft's position on the plot
     scat.set_offsets([[x_current, y_current]])
     scatters.append(scat)
+    print("b")
     return scatters
 
 # Create the animation
