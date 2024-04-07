@@ -7,12 +7,13 @@ from matplotlib.cm import get_cmap
 Pi = np.pi
 G = 6.67384e-12  # Gravitational constant
 MTitanfall = 3000  # Mass of the spacecraft in kg
-Limit = 8e12  # Graph limit in meters
-Tijdstapfactor = 1  # Time step factor
-delta_t = 86400 * Tijdstapfactor  # Tijdstappen in dagen
+Limit = 8e11  # Graph limit in meters
+Tijdstapfactor = 20  # Time step factor
+delta_t = 1  # Tijdstap in dagen
 Totaal_opgebrande_brandstof = 0
 
 t = 0 # tijd in dagen
+t_max = 5000
 
 # Button to start simulation
 control_panel_ax = plt.axes([0.7, 0.05, 0.1, 0.05])  # [left, bottom, width, height]
@@ -98,7 +99,7 @@ colors = [cmap(i) for i in range(len(Hemellichamen)+1)]
 
 # Function to calculate angular velocity
 def Hoeksnelheid(R, T):
-    if T == 0:
+    if T == 0: # delen door nul is flauwekul save
         return None
     else:
         V = (2 * Pi) / T        # Met T in seconden, dus V in radialen/seconde
@@ -261,13 +262,16 @@ scat = ax.scatter([], [], s=10)
 
 def calculate_Values():
     global t
-    while t < 5000:    
+    while t <= t_max:    
         # Calculate force and update spacecraft's position
         Planetenposities(t)
         Fres()
         bewegingTitanfall(t)
-        t += 1
-    print(pos_Hemellichamen_t)
+        t += delta_t
+
+    # for tijd in pos_Hemellichamen_t["Saturnus"]:
+    #     print(f"op t = {tijd} is de x van Saturnus {pos_Hemellichamen_t['Saturnus'][tijd]['x']}")
+    #     print(f"op t = {tijd} is de y van Saturnus {pos_Hemellichamen_t['Saturnus'][tijd]['y']}")    
 
 calculate_Values()
 
@@ -286,18 +290,25 @@ def init():
 def update(frame):
     global pos_Hemellichamen_t, Tijdstapfactor
 
-    t_current = frame * Tijdstapfactor
-
+    t_current = frame * Tijdstapfactor 
+    if t_current > t_max: # Stop the simulation when the maximum time is reached
+        t_current = t_max
+    
+    print(f"t = {t_current}")
+    
     for i, (planet, color) in enumerate(zip(Hemellichamen.keys(), colors)):
         x_current = pos_Hemellichamen_t[planet][t_current]["x"]
         y_current = pos_Hemellichamen_t[planet][t_current]["y"]
+        if planet == "Aarde":
+            print ("Aarde staat op x =", x_current," en y =", y_current)
+
         scatters[i].set_offsets([[x_current, y_current]])
     
     x_current = pos_Hemellichamen_t["Titanfall"][t_current]["x"] 
     y_current = pos_Hemellichamen_t["Titanfall"][t_current]["y"]
 
     # Update spacecraft's position on the plot
-    scat.set_offsets(x_current, y_current)
+    scat.set_offsets([[x_current, y_current]])
     scatters.append(scat)
     return scatters
 
