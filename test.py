@@ -16,8 +16,8 @@ radiaal_per_graad = 2 * Pi / 360
 
 # Simulation parameters
 Limit = 8e12  # Graph limit in meters
-Tijdstapfactor = Seconden_in_een_dag  # Time step factor
-delta_t = 1000 * Pi  # Tijdstap in seconden
+Tijdstapfactor = Seconden_in_een_dag/100  # Time step factor
+delta_t = 1000  # Tijdstap in seconden
 Totaal_opgebrande_brandstof = 0
 
 t = 0 # tijd in seconden
@@ -278,15 +278,9 @@ def init():
 # Function to update the animation
 def update(frame):
     global pos_Hemellichamen_t, Tijdstapfactor, delta_t
-    freem = 0
-    t_current = round(freem * Tijdstapfactor * delta_t, 4) # dit wordt afgerond omdat we twee floats met elkaar vergelijken
-    
-    print(f"t = {t_current}")
-    print(f"frame = {freem}")
-    print(f"Tijdstapfactor = {Tijdstapfactor}")
-    print(f"delta_t = {delta_t}")
-
-    print("g")
+    t_current = round(frame * Tijdstapfactor * delta_t, 4) # dit wordt afgerond omdat we twee floats met elkaar vergelijken
+    print(t_current)
+    print(pos_Hemellichamen_t["Aarde"][0])
     for i, (planet, color) in enumerate(zip(Hemellichamen.keys(), colors)):
         x_current = pos_Hemellichamen_t[planet][t_current]["x"]
         y_current = pos_Hemellichamen_t[planet][t_current]["y"]
@@ -294,17 +288,17 @@ def update(frame):
             # print ("Aarde staat op x =", x_current," en y =", y_current)
 
         scatters[i].set_offsets([[x_current, y_current]])
-    print("x")
+
     x_current = pos_Hemellichamen_t["Titanfall"][t_current]["x"] 
     y_current = pos_Hemellichamen_t["Titanfall"][t_current]["y"]
-    print("a")
+
     # Update spacecraft's position on the plot
     scat.set_offsets([[x_current, y_current]])
     scatters.append(scat)
-    print("b")
+
     return scatters
 
 # Create the animation
-ani = FuncAnimation(fig, update, frames=np.arange(0, round(highest_t/(Tijdstapfactor * delta_t), 1)), init_func=init, blit=True)
+ani = FuncAnimation(fig, update, frames=np.arange(0, 1000000), init_func=init, blit=True)
 plt.legend(loc='upper left')
 plt.show()
