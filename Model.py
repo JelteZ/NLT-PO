@@ -231,7 +231,7 @@ def calculate_Values():
     t = 0
     while t <= t_max:
         progress = t / t_max * 100
-
+        print(f"{t}/{t_max} \t Progress: {progress:.2f}%")
         # Calculate force and update spacecraft's position
         Planetenposities(t) 
         Fres(t)
